@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install tailwindcss @tailwindcss/vite)",
+      "Bash(npm run build)",
+      "WebFetch(domain:www.whoop.in)",
+      "WebFetch(domain:www.ultrahuman.com)"
+    ]
+  }
+}

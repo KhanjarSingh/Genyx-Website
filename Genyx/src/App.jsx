@@ -1,0 +1,1844 @@
+import React, { useEffect, useRef, useState } from 'react';
+import podImg from './assets/pod1.jpeg';
+import podSpec from './assets/pod2.jpeg';
+import mobileHandImg from './assets/Mobile.jpeg';
+
+const DEMO_VIDEO = 'https://cdn.speedsize.com/3f711f28-1488-44dc-b013-5e43284ac4b0/https://public-web-assets.uh-static.com/web_v2/homepage-v3/app-section/display-videos/ring-new.mp4';
+
+// ─── CSS ─────────────────────────────────────────────────────────────────────────
+const CSS = `
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,200;9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap');
+
+:root {
+  --bg:   #080808;  --bg2:  #0D0D0D;  --bg3:  #111111;
+  --txt:  #FFFFFF;  --sub:  #555555;  --dim:  #2a2a2a;
+  --bd:   rgba(255,255,255,0.06);  --div:  rgba(255,255,255,0.05);
+  --num:  rgba(255,255,255,0.12);
+  --card: #0F0F0F;
+  --a:    #4DFFEF;  --at:   rgba(77,255,239,0.07);
+  --nb:   rgba(8,8,8,0.9);
+  --sh:   0 48px 96px rgba(0,0,0,0.6);
+}
+:root[data-theme="light"] {
+  --bg:   #FAFAFA;  --bg2:  #F2F2F2;  --bg3:  #EBEBEB;
+  --txt:  #0A0A0A;  --sub:  #6a6a6a;  --dim:  #C0C0C0;
+  --bd:   rgba(0,0,0,0.07);          --div:  rgba(0,0,0,0.06);
+  --num:  rgba(0,0,0,0.10);
+  --card: #FFFFFF;
+  --a:    #009E98;  --at:   rgba(0,158,152,0.07);
+  --nb:   rgba(250,250,250,0.92);
+  --sh:   0 48px 96px rgba(0,0,0,0.1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--txt);
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased; overflow-x: hidden;
+  cursor: none;
+  transition: background .4s ease, color .4s ease;
+}
+a, button { cursor: none; text-decoration: none; }
+::-webkit-scrollbar { width: 2px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--dim); }
+
+/* ── Cursor ── */
+#cur {
+  position: fixed; width: 7px; height: 7px;
+  background: var(--a); border-radius: 50%;
+  pointer-events: none; z-index: 9999;
+  transform: translate(-50%,-50%);
+  transition: width .22s ease, height .22s ease, opacity .22s ease, background .4s ease;
+}
+#cur.lg { width: 22px; height: 22px; opacity: .35; }
+
+/* ── Reveal ── */
+.r {
+  opacity: 0; transform: translateY(32px);
+  transition: opacity .85s cubic-bezier(.4,0,.2,1), transform .85s cubic-bezier(.4,0,.2,1);
+}
+.r.in { opacity: 1; transform: translateY(0); }
+
+/* ── Hero word stagger ── */
+.hw { display: inline-block; opacity: 0; transform: translateY(24px); }
+.hw.in { animation: hwIn .75s cubic-bezier(.4,0,.2,1) forwards; }
+@keyframes hwIn { to { opacity: 1; transform: translateY(0); } }
+
+/* ── Tag / Label ── */
+.tag {
+  font-size: 10px; font-weight: 500;
+  letter-spacing: .2em; text-transform: uppercase;
+  color: var(--a); display: block; margin-bottom: 20px;
+  transition: color .4s ease;
+}
+
+/* ── Nav link ── */
+.nl { color: var(--sub); font-size: 13px; transition: color .25s ease; }
+.nl:hover { color: var(--txt); }
+
+/* ── CTA pill ── */
+.cp { position: relative; overflow: hidden; transition: color .38s ease; }
+.cp::before {
+  content: ''; position: absolute; inset: 0;
+  background: var(--a);
+  transform: translateX(-101%);
+  transition: transform .44s cubic-bezier(.4,0,.2,1), background .4s ease;
+}
+.cp:hover::before { transform: translateX(0); }
+.cp:hover { color: #080808; }
+.cp span { position: relative; z-index: 1; }
+
+/* ── Divider ── */
+.div { width: 100%; height: 1px; background: var(--div); transition: background .4s ease; }
+
+/* ── Metric card ── */
+.mc {
+  background: var(--card); border: 1px solid var(--bd); border-radius: 20px; padding: 36px;
+  transition: transform .3s cubic-bezier(.4,0,.2,1), border-color .3s ease, box-shadow .3s ease, background .4s ease;
+}
+.mc:hover { transform: translateY(-4px); border-color: rgba(77,255,239,.2); box-shadow: 0 16px 48px rgba(77,255,239,.04); }
+
+/* ── Diff card ── */
+.dc {
+  background: var(--card); border: 1px solid var(--bd); border-radius: 20px; padding: 36px;
+  transition: transform .3s cubic-bezier(.4,0,.2,1), border-color .3s ease, background .4s ease;
+}
+.dc:hover { transform: translateY(-4px); border-color: rgba(77,255,239,.18); }
+
+/* ── Rep quality dot ── */
+@keyframes rq {
+  0%,28%  { background:#22c55e; box-shadow:0 0 8px rgba(34,197,94,.65); }
+  38%,62% { background:#eab308; box-shadow:0 0 8px rgba(234,179,8,.65); }
+  72%,96% { background:#ef4444; box-shadow:0 0 8px rgba(239,68,68,.65); }
+  100%    { background:#22c55e; box-shadow:0 0 8px rgba(34,197,94,.65); }
+}
+.rdot { width: 9px; height: 9px; border-radius: 50%; animation: rq 3s ease-in-out infinite; }
+
+/* ── Record dot ── */
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+.rec { animation: pulse 1.6s ease-in-out infinite; }
+
+/* ── Pod LED glow ── */
+@keyframes ledPulse { 0%,100%{opacity:.9;r:4.5} 50%{opacity:.5;r:3.5} }
+.led { animation: ledPulse 2.2s ease-in-out infinite; }
+
+/* ── Pod lens glow ── */
+@keyframes lensBreathe { 0%,100%{opacity:.08;} 50%{opacity:.18;} }
+.lens-glow { animation: lensBreathe 3s ease-in-out infinite; }
+
+/* ── Fatigue curve draw ── */
+.fp { stroke-dasharray: 350; stroke-dashoffset: 350; transition: stroke-dashoffset 1.9s cubic-bezier(.4,0,.2,1) .2s; }
+.fp.in { stroke-dashoffset: 0; }
+
+/* ── Summary card slide ── */
+.sc { opacity: 0; transform: translateY(48px); transition: opacity .95s cubic-bezier(.4,0,.2,1), transform .95s cubic-bezier(.4,0,.2,1); }
+.sc.in { opacity: 1; transform: translateY(0); }
+
+/* ── Theme toggle ── */
+.tt {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--at); border: 1px solid var(--bd);
+  display: flex; align-items: center; justify-content: center;
+  transition: background .3s ease, transform .25s ease;
+}
+.tt:hover { transform: rotate(22deg); }
+
+/* ── Stats strip ── */
+.ss { display:grid; gap:1px; background: var(--div); border-radius: 20px; overflow:hidden; }
+
+/* ── Hamburger ── */
+.hb {
+  display: none;
+  flex-direction: column; justify-content: center; align-items: center;
+  width: 36px; height: 36px;
+  background: none; border: none; padding: 0;
+  gap: 5px;
+}
+.hb-line {
+  display: block; width: 20px; height: 1.5px;
+  background: var(--txt); border-radius: 2px;
+  transition: transform .3s ease, opacity .3s ease, top .3s ease;
+}
+
+/* Mobile menu overlay */
+.mob-menu {
+  position: fixed; inset: 0; z-index: 98;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity .3s ease;
+  padding-bottom: 60px;
+}
+.mob-menu.open { opacity: 1; pointer-events: all; }
+
+/* ── App preview handset ── */
+.app-hand-zone {
+  position: relative; display: flex; justify-content: center; align-items: center;
+  padding-bottom: 80px; padding-top: 20px;
+}
+.app-hand-glow {
+  position: absolute; width: min(460px, 95vw); aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(77,255,239,.08) 0%, transparent 68%);
+  pointer-events: none; transform: translateY(16px);
+}
+.app-hand-wrap {
+  position: relative; z-index: 2;
+  width: min(430px, 88vw);
+}
+.app-hand-img {
+  width: 100%; height: auto; display: block;
+  filter: drop-shadow(0 42px 96px rgba(0,0,0,.8));
+}
+.app-live-screen {
+  position: absolute; z-index: 3; overflow: hidden;
+  left: 40.7%; top: 13%;
+  width: 19.6%; aspect-ratio: 9 / 19.4;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.22);
+  box-shadow: 0 14px 34px rgba(0,0,0,0.45), 0 0 24px rgba(77,255,239,0.12);
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────── */
+@media (max-width:1024px) {
+  .g2 { grid-template-columns:1fr!important; }
+  .g2r { grid-template-columns:1fr!important; }
+  .g3r { grid-template-columns:1fr 1fr!important; }
+  .g4r { grid-template-columns:1fr 1fr!important; }
+  .pw-sp { grid-template-columns:1fr!important; }
+  .prob-g { grid-template-columns:1fr!important; }
+  .pod-cols { grid-template-columns:1fr!important; text-align:center!important; }
+}
+@media (max-width:840px) {
+  .nm  { display:none!important; }
+  .hb  { display:flex!important; }
+  .nm-cta { display:none!important; }
+  .np  { padding-left:20px!important; padding-right:20px!important; }
+  .sp  { padding-left:24px!important; padding-right:24px!important; }
+  .sec { padding-top:110px!important; padding-bottom:110px!important; }
+  .g2  { grid-template-columns:1fr!important; }
+  .g3  { grid-template-columns:1fr 1fr!important; }
+  .ss  { grid-template-columns:1fr!important; }
+  /* Step fix: keep side-by-side but shrink number */
+  .step-g  { grid-template-columns:60px 1fr!important; gap:16px!important; }
+  .step-num { font-size:48px!important; line-height:1!important; }
+  .pod-strip { grid-template-columns:repeat(2,1fr)!important; }
+  .g3r  { grid-template-columns:1fr!important; }
+  .g4r  { grid-template-columns:1fr 1fr!important; }
+}
+@media (max-width:600px) {
+  .sec { padding-top:80px!important; padding-bottom:80px!important; }
+  .sp  { padding-left:20px!important; padding-right:20px!important; }
+  /* Step: stack number on top of content */
+  .step-g  { display:block!important; }
+  .step-num { font-size:36px!important; display:inline-block; margin-bottom:10px; }
+  .g3  { grid-template-columns:1fr!important; }
+  .mc  { padding:22px!important; }
+  .dc  { padding:22px!important; }
+  .sc-p { padding:20px!important; }
+  .g2r { grid-template-columns:1fr!important; }
+  .g4r { grid-template-columns:1fr!important; }
+  .app-hand-wrap { width:min(340px, 92vw)!important; }
+  .app-live-screen { left:40.8%!important; top:13.1%!important; width:19.8%!important; border-radius:14px!important; }
+  .pod-strip { grid-template-columns:1fr!important; }
+  /* Problem: hide giant stat number on tiny screens */
+  .stat-num { font-size:clamp(72px,18vw,120px)!important; }
+  .prob-g { gap:16px!important; }
+}
+
+/* ── Form input ── */
+.fi {
+  width: 100%; background: var(--bg3); border: 1px solid var(--bd);
+  border-radius: 12px; padding: 16px 20px;
+  color: var(--txt); font-family: 'DM Sans', sans-serif; font-size: 15px;
+  outline: none; appearance: none;
+  transition: border-color .25s ease, background .4s ease, color .4s ease;
+}
+.fi:focus { border-color: var(--a); }
+.fi::placeholder { color: var(--sub); }
+textarea.fi { resize: none; line-height: 1.6; }
+`;
+
+// ─── Scroll reveal ────────────────────────────────────────────────────────────────
+function useReveal() {
+  useEffect(() => {
+    const els = document.querySelectorAll('.r');
+    if (!els.length) return;
+    const io = new IntersectionObserver(
+      es => es.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('in');
+        } else {
+          e.target.classList.remove('in');
+        }
+      }),
+      { threshold: 0.08, rootMargin: '0px 0px -32px 0px' }
+    );
+    els.forEach(el => io.observe(el));
+    return () => io.disconnect();
+  }, []);
+}
+
+// ─── Cursor ───────────────────────────────────────────────────────────────────────
+function Cursor() {
+  const ref = useRef(null);
+  useEffect(() => {
+    const el = ref.current; if (!el) return;
+    const mv = e => { el.style.left = e.clientX + 'px'; el.style.top = e.clientY + 'px'; };
+    const ov = e => { e.target.closest('a,button,[data-h]') ? el.classList.add('lg') : el.classList.remove('lg'); };
+    window.addEventListener('mousemove', mv, { passive: true });
+    window.addEventListener('mouseover', ov, { passive: true });
+    return () => { window.removeEventListener('mousemove', mv); window.removeEventListener('mouseover', ov); };
+  }, []);
+  return <div id="cur" ref={ref} />;
+}
+
+// ─── Theme Toggle Icon ────────────────────────────────────────────────────────────
+function TIcon({ theme }) {
+  return theme === 'dark' ? (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" strokeWidth="1.8" strokeLinecap="round" style={{ stroke: 'var(--txt)', transition: 'stroke .4s ease' }}>
+      <circle cx="12" cy="12" r="5" />
+      <line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" />
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+      <line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" />
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+    </svg>
+  ) : (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" strokeWidth="1.8" strokeLinecap="round" style={{ stroke: 'var(--txt)', transition: 'stroke .4s ease' }}>
+      <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+    </svg>
+  );
+}
+
+// ─── Nav ─────────────────────────────────────────────────────────────────────────
+function Nav({ theme, toggleTheme, page, setPage }) {
+  const [up, setUp] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const h = () => setUp(window.scrollY > 44);
+    window.addEventListener('scroll', h, { passive: true });
+    return () => window.removeEventListener('scroll', h);
+  }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [open]);
+
+  const links = [
+    { label: 'Platform', pg: 'platform' },
+    { label: 'Analytics', pg: 'analytics' },
+    { label: 'About', pg: 'about' },
+    { label: 'Contact', pg: 'contact' },
+  ];
+
+  const go = (pg) => { setPage(pg); setOpen(false); };
+
+  return (
+    <>
+      <nav className="np" style={{
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
+        height: 60, display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center',
+        paddingLeft: 52, paddingRight: 52,
+        background: up || open ? 'var(--nb)' : 'transparent',
+        backdropFilter: up || open ? 'blur(20px)' : 'none',
+        borderBottom: up || open ? '1px solid var(--div)' : 'none',
+        transition: 'background .35s ease, border-color .35s ease',
+      }}>
+        {/* Logo */}
+        <button onClick={() => go('home')} style={{ display: 'flex', alignItems: 'center', gap: 9, zIndex: 101, background: 'none', border: 'none', padding: 0, justifySelf: 'start' }}>
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+            <polygon points="10,1.5 18.5,6 18.5,14 10,18.5 1.5,14 1.5,6" style={{ stroke: 'var(--a)', transition: 'stroke .4s ease' }} strokeWidth="1.4" fill="none" />
+            <line x1="10" y1="1.5" x2="10" y2="18.5" style={{ stroke: 'var(--a)', transition: 'stroke .4s ease' }} strokeWidth="1.4" opacity=".28" />
+            <line x1="1.5" y1="6" x2="18.5" y2="14" style={{ stroke: 'var(--a)', transition: 'stroke .4s ease' }} strokeWidth="1.4" opacity=".28" />
+            <line x1="18.5" y1="6" x2="1.5" y2="14" style={{ stroke: 'var(--a)', transition: 'stroke .4s ease' }} strokeWidth="1.4" opacity=".28" />
+          </svg>
+          <span style={{ fontWeight: 600, fontSize: 13, letterSpacing: '.12em', color: 'var(--txt)', transition: 'color .4s ease' }}>GENYX</span>
+        </button>
+
+        {/* Desktop links */}
+        <div className="nm" style={{ display: 'flex', gap: 36 }}>
+          {links.map(({ label, pg }) => (
+            <button key={label} onClick={() => go(pg)} className="nl" style={{
+              background: 'none', border: 'none', padding: 0,
+              color: page === pg && pg !== 'home' ? 'var(--txt)' : undefined,
+            }}>{label}</button>
+          ))}
+        </div>
+
+        {/* Right controls */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, zIndex: 101, justifySelf: 'end' }}>
+          <button className="tt" onClick={toggleTheme} aria-label="Toggle theme"><TIcon theme={theme} /></button>
+          <button className="cp nm-cta" onClick={() => go('contact')} style={{
+            background: 'transparent', border: '1px solid var(--bd)',
+            borderRadius: 100, padding: '8px 20px',
+            color: 'var(--txt)', fontSize: 12, fontWeight: 500, letterSpacing: '.05em',
+            transition: 'color .4s ease, border-color .4s ease',
+          }}>
+            <span>Request Access</span>
+          </button>
+          {/* Hamburger */}
+          <button className="hb" onClick={() => setOpen(o => !o)} aria-label="Menu">
+            <span className="hb-line" style={{ transform: open ? 'translateY(6.5px) rotate(45deg)' : 'none' }} />
+            <span className="hb-line" style={{ opacity: open ? 0 : 1 }} />
+            <span className="hb-line" style={{ transform: open ? 'translateY(-6.5px) rotate(-45deg)' : 'none' }} />
+          </button>
+        </div>
+      </nav>
+
+      {/* Mobile menu overlay */}
+      <div className={`mob-menu${open ? ' open' : ''}`}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, width: '100%', padding: '0 40px' }}>
+          {links.map(({ label, pg }, i) => (
+            <button key={label} onClick={() => go(pg)} style={{
+              display: 'block', width: '100%', textAlign: 'center',
+              padding: '18px 0', fontSize: 'clamp(22px, 6vw, 30px)', fontWeight: 500,
+              color: 'var(--txt)', letterSpacing: '-.01em',
+              background: 'none', border: 'none',
+              borderBottom: i < links.length - 1 ? '1px solid var(--div)' : 'none',
+              transition: 'color .2s ease',
+            }}>{label}</button>
+          ))}
+        </div>
+        <button className="cp" onClick={() => go('contact')} style={{
+          marginTop: 40, background: 'transparent',
+          border: '1px solid var(--a)', borderRadius: 100,
+          padding: '14px 44px', color: 'var(--txt)',
+          fontSize: 14, fontWeight: 500, letterSpacing: '.06em',
+          transition: 'color .4s ease, border-color .4s ease',
+        }}>
+          <span>Request Access</span>
+        </button>
+      </div>
+    </>
+  );
+}
+
+// ─── Pod SVG ─────────────────────────────────────────────────────────────────────
+function PodSVG({ size = 300 }) {
+  const s = size;
+  return (
+    <svg width={s} height={s * 1.35} viewBox="0 0 300 405" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="pbg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#1e1e1e" /><stop offset="100%" stopColor="#0a0a0a" />
+        </linearGradient>
+        <radialGradient id="lgr" cx="42%" cy="40%" r="60%">
+          <stop offset="0%" stopColor="#202020" />
+          <stop offset="50%" stopColor="#0e0e0e" />
+          <stop offset="100%" stopColor="#050505" />
+        </radialGradient>
+        <linearGradient id="lring" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#4DFFEF" stopOpacity="0.75" />
+          <stop offset="30%" stopColor="#4DFFEF" stopOpacity="0.12" />
+          <stop offset="70%" stopColor="#4DFFEF" stopOpacity="0.05" />
+          <stop offset="100%" stopColor="#4DFFEF" stopOpacity="0.45" />
+        </linearGradient>
+        <radialGradient id="aura" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#4DFFEF" stopOpacity="0.14" />
+          <stop offset="100%" stopColor="#4DFFEF" stopOpacity="0" />
+        </radialGradient>
+        <filter id="pod-blur" x="-40%" y="-40%" width="180%" height="180%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="14" result="b" />
+          <feFlood floodColor="#4DFFEF" floodOpacity="0.07" result="c" />
+          <feComposite in="c" in2="b" operator="in" result="cb" />
+          <feMerge><feMergeNode in="cb" /><feMergeNode in="SourceGraphic" /></feMerge>
+        </filter>
+        <filter id="led-glow" x="-200%" y="-200%" width="500%" height="500%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="b" />
+          <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+        </filter>
+      </defs>
+
+      {/* Ambient lens glow behind pod */}
+      <ellipse cx="150" cy="195" rx="100" ry="72" fill="url(#aura)" className="lens-glow" />
+
+      {/* Mount arm */}
+      <rect x="142" y="0" width="16" height="72" rx="4" fill="rgba(255,255,255,0.05)" />
+      {/* Mount bracket */}
+      <rect x="124" y="67" width="52" height="16" rx="4" fill="rgba(255,255,255,0.07)" />
+
+      {/* Pod body */}
+      <rect x="44" y="83" width="212" height="140" rx="32" fill="url(#pbg)" filter="url(#pod-blur)" />
+
+      {/* Pod body highlight – top rim */}
+      <path d="M76 83 Q150 80 224 83" stroke="rgba(255,255,255,0.09)" strokeWidth="1.5" fill="none" />
+
+      {/* Pod side vents (subtle) */}
+      {[0,1,2].map(i => (
+        <rect key={i} x="50" y={104 + i * 16} width="8" height="6" rx="2" fill="rgba(255,255,255,0.04)" />
+      ))}
+      {[0,1,2].map(i => (
+        <rect key={i} x="242" y={104 + i * 16} width="8" height="6" rx="2" fill="rgba(255,255,255,0.04)" />
+      ))}
+
+      {/* Outer lens ring (thin, very subtle) */}
+      <circle cx="150" cy="153" r="60" stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+
+      {/* Accent lens ring */}
+      <circle cx="150" cy="153" r="55" stroke="url(#lring)" strokeWidth="2.5" />
+
+      {/* Lens body */}
+      <circle cx="150" cy="153" r="48" fill="url(#lgr)" />
+
+      {/* Lens inner ring */}
+      <circle cx="150" cy="153" r="34" stroke="rgba(255,255,255,0.04)" strokeWidth="1.5" fill="none" />
+
+      {/* Lens reflection glint */}
+      <ellipse cx="135" cy="139" rx="11" ry="7" fill="rgba(255,255,255,0.055)" transform="rotate(-28 135 139)" />
+
+      {/* Lens center iris */}
+      <circle cx="150" cy="153" r="8" fill="rgba(5,5,5,0.95)" />
+      <circle cx="150" cy="153" r="3" fill="rgba(77,255,239,0.28)" />
+
+      {/* GENYX label on pod */}
+      <text x="150" y="217" textAnchor="middle" fill="rgba(255,255,255,0.12)"
+        fontSize="8.5" letterSpacing="5" fontFamily="DM Sans, sans-serif" fontWeight="500">GENYX</text>
+
+      {/* Status LED */}
+      <circle cx="216" cy="100" r="4.5" fill="#4DFFEF" className="led" filter="url(#led-glow)" />
+
+      {/* LED label */}
+      <text x="228" y="104" fill="rgba(77,255,239,0.4)" fontSize="7.5" letterSpacing="1" fontFamily="DM Sans, sans-serif">LIVE</text>
+
+      {/* Bottom shadow line */}
+      <rect x="44" y="221" width="212" height="1" rx="0.5" fill="rgba(0,0,0,0.4)" />
+
+      {/* Ground shadow ellipse */}
+      <ellipse cx="150" cy="360" rx="90" ry="14" fill="rgba(0,0,0,0.45)" />
+    </svg>
+  );
+}
+
+// ─── Hero ─────────────────────────────────────────────────────────────────────────
+function Hero() {
+  const cvs = useRef(null);
+
+  useEffect(() => {
+    document.querySelectorAll('.hw').forEach((el, i) =>
+      setTimeout(() => el.classList.add('in'), 150 + i * 48)
+    );
+  }, []);
+
+  useEffect(() => {
+    const c = cvs.current; if (!c) return;
+    const ctx = c.getContext('2d'); let raf;
+    const fit = () => { c.width = c.offsetWidth; c.height = c.offsetHeight; };
+    fit();
+    const ro = new ResizeObserver(fit); ro.observe(c);
+    const N = 16;
+    const pts = Array.from({ length: N }, () => ({
+      x: Math.random() * (c.width || 1400), y: Math.random() * (c.height || 900),
+      vx: (Math.random() - .5) * .32, vy: (Math.random() - .5) * .32,
+    }));
+    const draw = () => {
+      ctx.clearRect(0, 0, c.width, c.height);
+      pts.forEach(p => {
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0 || p.x > c.width) p.vx *= -1;
+        if (p.y < 0 || p.y > c.height) p.vy *= -1;
+      });
+      for (let i = 0; i < N; i++)
+        for (let j = i + 1; j < N; j++) {
+          const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y, d = Math.sqrt(dx * dx + dy * dy);
+          if (d < 200) {
+            ctx.beginPath(); ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(pts[j].x, pts[j].y);
+            ctx.strokeStyle = `rgba(77,255,239,${(1 - d / 200) * .038})`; ctx.lineWidth = .6; ctx.stroke();
+          }
+        }
+      pts.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, 1.3, 0, Math.PI * 2); ctx.fillStyle = 'rgba(77,255,239,.07)'; ctx.fill(); });
+      raf = requestAnimationFrame(draw);
+    };
+    draw();
+    return () => { cancelAnimationFrame(raf); ro.disconnect(); };
+  }, []);
+
+  return (
+    <section style={{
+      position: 'relative', minHeight: '100vh',
+      display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center',
+      overflow: 'hidden', background: 'var(--bg)',
+      transition: 'background .4s ease',
+    }}>
+      {/* Subtle radial glow */}
+      <div style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none',
+        background: 'radial-gradient(ellipse 60% 50% at 50% 40%, rgba(77,255,239,.022) 0%, transparent 70%)',
+      }} />
+      <canvas ref={cvs} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />
+
+      <div className="sp" style={{ position: 'relative', zIndex: 2, textAlign: 'center', maxWidth: 980, paddingLeft: 48, paddingRight: 48, paddingTop: 80 }}>
+        {/* Label */}
+        <div className="hw" style={{ marginBottom: 32 }}>
+          <span className="tag" style={{ display: 'inline-block', margin: 0 }}>AI Movement Intelligence</span>
+        </div>
+
+        {/* Hero headline — very large */}
+        <h1 style={{
+          fontSize: 'clamp(60px, 10.5vw, 126px)',
+          fontWeight: 700, lineHeight: .98, letterSpacing: '-.03em',
+          marginBottom: 32, color: 'var(--txt)', transition: 'color .4s ease',
+        }}>
+          {'Movement,'.split('').map((ch, i) => (
+            <span key={'a' + i} className="hw" style={{ animationDelay: `${.2 + i * .02}s` }}>{ch}</span>
+          ))}
+          <br />
+          {'Measured.'.split('').map((ch, i) => (
+            <span key={'b' + i} className="hw" style={{ animationDelay: `${.48 + i * .02}s` }}>{ch}</span>
+          ))}
+        </h1>
+
+        {/* Subline */}
+        <p className="hw" style={{
+          fontSize: 'clamp(15px, 1.6vw, 19px)', color: 'var(--sub)',
+          maxWidth: 400, margin: '0 auto 52px', lineHeight: 1.7, fontWeight: 300,
+          animationDelay: '.88s', transition: 'color .4s ease',
+        }}>
+          Computer vision coaching. No wearables. No manual input.
+        </p>
+
+        {/* CTAs */}
+        <div className="hw" style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', animationDelay: '1.02s' }}>
+          <button className="cp" style={{
+            background: 'transparent', border: '1px solid var(--bd)',
+            borderRadius: 100, padding: '14px 36px',
+            color: 'var(--txt)', fontSize: 13, fontWeight: 500, letterSpacing: '.06em',
+            transition: 'color .4s ease, border-color .4s ease',
+          }}>
+            <span>Request Access</span>
+          </button>
+          <button style={{
+            background: 'var(--at)', border: '1px solid var(--a)',
+            borderRadius: 100, padding: '14px 36px',
+            color: 'var(--a)', fontSize: 13, fontWeight: 500, letterSpacing: '.06em',
+            transition: 'all .4s ease',
+          }}>
+            See how it works ↓
+          </button>
+        </div>
+
+        {/* Pod illustration — floating below text */}
+        <div className="hw" style={{ marginTop: 64, display: 'flex', justifyContent: 'center', animationDelay: '1.18s' }}>
+          <div style={{ filter: 'drop-shadow(0 0 60px rgba(77,255,239,.1))' }}>
+            <PodSVG size={220} />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Pod Section ─────────────────────────────────────────────────────────────────
+function PodSection() {
+  useReveal();
+  return (
+    <section className="sp sec" style={{
+      background: 'var(--bg2)', paddingTop: 180, paddingBottom: 0,
+      paddingLeft: 80, paddingRight: 80, transition: 'background .4s ease',
+    }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+        {/* Header */}
+        <div style={{ marginBottom: 56 }}>
+          <span className="tag r">The Device</span>
+          <div className="r" style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 24, transitionDelay: '.08s' }}>
+            <h2 style={{
+              fontSize: 'clamp(44px, 7vw, 88px)', fontWeight: 700,
+              letterSpacing: '-.032em', lineHeight: .98,
+              color: 'var(--txt)', transition: 'color .4s ease',
+            }}>Meet the Pod.</h2>
+            <p style={{
+              fontSize: 'clamp(14px, 1.4vw, 17px)', color: 'var(--sub)',
+              maxWidth: 340, lineHeight: 1.72, fontWeight: 300,
+              paddingBottom: 6, transition: 'color .4s ease',
+            }}>
+              Fixed-mount or floor-standing. AI-native. No configuration required per user.
+            </p>
+          </div>
+        </div>
+
+        {/* Hero photo — the real Genyx Pod in a premium gym */}
+        <div className="r" style={{
+          position: 'relative', borderRadius: '20px 20px 0 0', overflow: 'hidden',
+          aspectRatio: '16/7', transitionDelay: '.15s',
+        }}>
+          <img
+            src={podImg}
+            alt="Genyx Pod deployed in a premium gym — AI camera on floor stand near dumbbell rack"
+            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 55%', display: 'block' }}
+          />
+          {/* Subtle dark vignette overlay */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: 'linear-gradient(to right, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.1) 45%, rgba(0,0,0,0.35) 100%)',
+          }} />
+          {/* Pod callout — bottom-left overlay */}
+          <div style={{
+            position: 'absolute', bottom: 32, left: 36,
+            display: 'flex', flexDirection: 'column', gap: 4,
+          }}>
+            <span style={{ fontSize: 9, color: 'rgba(77,255,239,.8)', letterSpacing: '.2em', textTransform: 'uppercase' }}>
+              Genyx Pod — Floor Stand
+            </span>
+            <span style={{ fontSize: 16, fontWeight: 600, color: '#fff' }}>
+              AI vision. No wearables.
+            </span>
+          </div>
+          {/* Live badge top-right */}
+          <div style={{
+            position: 'absolute', top: 24, right: 24,
+            display: 'flex', alignItems: 'center', gap: 7,
+            background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: 100, padding: '6px 14px',
+          }}>
+            <span className="rec" style={{ width: 7, height: 7, borderRadius: '50%', background: '#ef4444', display: 'inline-block' }} />
+            <span style={{ fontSize: 11, color: '#fff', letterSpacing: '.1em', fontWeight: 500 }}>LIVE</span>
+          </div>
+        </div>
+
+        {/* Feature strip below photo */}
+        <div className="pod-strip r" style={{
+          display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: 1, background: 'var(--div)',
+          borderRadius: '0 0 20px 20px', overflow: 'hidden',
+          marginBottom: 180, transitionDelay: '.25s',
+        }}>
+          {[
+            ['Computer Vision AI', 'Vision Engine'],
+            ['< 200ms Latency', 'Real-time processing'],
+            ['Zero Calibration', 'Any athlete, instantly'],
+            ['Multi-location', 'One platform, every pod'],
+          ].map(([title, sub]) => (
+            <div key={title} style={{ background: 'var(--bg3)', padding: '28px 24px', transition: 'background .4s ease' }}>
+              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--txt)', marginBottom: 5, transition: 'color .4s ease' }}>{title}</div>
+              <div style={{ fontSize: 12, color: 'var(--sub)', transition: 'color .4s ease' }}>{sub}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Pod Spec ────────────────────────────────────────────────────────────────────
+function PodSpec() {
+  useReveal();
+  return (
+    <section className="sp sec" style={{
+      background: 'var(--bg)', paddingTop: 140, paddingBottom: 140,
+      paddingLeft: 80, paddingRight: 80, transition: 'background .4s ease',
+    }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+        {/* Header */}
+        <div style={{ marginBottom: 56 }}>
+          <span className="tag r">Engineering</span>
+          <div className="r" style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 24, transitionDelay: '.08s' }}>
+            <h2 style={{
+              fontSize: 'clamp(44px, 7vw, 88px)', fontWeight: 700,
+              letterSpacing: '-.032em', lineHeight: .98,
+              color: 'var(--txt)', transition: 'color .4s ease',
+            }}>Precision-engineered.</h2>
+            <p style={{
+              fontSize: 'clamp(14px, 1.4vw, 17px)', color: 'var(--sub)',
+              maxWidth: 360, lineHeight: 1.72, fontWeight: 300,
+              paddingBottom: 6, transition: 'color .4s ease',
+            }}>
+              Weighted aluminum base. 1080p AI camera. Ball-head articulation. Height-adjustable 0.9m–1.6m. Built for serious training environments.
+            </p>
+          </div>
+        </div>
+
+        {/* Full-width spec image */}
+        <div className="r" style={{
+          position: 'relative', borderRadius: 20, overflow: 'hidden',
+          background: 'var(--bg2)', transitionDelay: '.14s',
+        }}>
+          <img
+            src={podSpec}
+            alt="Genyx Pod technical specifications — floor stand with arducam 1080p camera, ball head, height adjustment"
+            style={{ width: '100%', display: 'block', objectFit: 'cover' }}
+          />
+          {/* Subtle border overlay */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            borderRadius: 20,
+            boxShadow: 'inset 0 0 0 1px var(--bd)',
+            pointerEvents: 'none',
+          }} />
+        </div>
+
+        {/* Spec pills below image */}
+        <div className="r pod-strip" style={{
+          display: 'grid', gridTemplateColumns: 'repeat(4,1fr)',
+          gap: 1, background: 'var(--div)',
+          borderRadius: '0 0 16px 16px', marginTop: 1,
+          overflow: 'hidden', transitionDelay: '.24s',
+        }}>
+          {[
+            ['Arducam 1080P', 'Custom matte grey housing'],
+            ['H: 0.9m – 1.6m', 'Seamless height lock'],
+            ['±90° Pan Rotation', 'Precision ball head'],
+            ['Weighted Aluminum', 'Brushed base, internal cable'],
+          ].map(([title, sub]) => (
+            <div key={title} style={{ background: 'var(--bg3)', padding: '24px 20px', transition: 'background .4s ease' }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--txt)', marginBottom: 4, transition: 'color .4s ease' }}>{title}</div>
+              <div style={{ fontSize: 11, color: 'var(--sub)', transition: 'color .4s ease' }}>{sub}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Problem ─────────────────────────────────────────────────────────────────────
+function Problem() {
+  useReveal();
+  return (
+    <section className="sp sec" style={{
+      background: 'var(--bg)', paddingTop: 180, paddingBottom: 180,
+      paddingLeft: 80, paddingRight: 80, transition: 'background .4s ease',
+    }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+        {/* Giant stat + headline */}
+        <div className="r" style={{ marginBottom: 72 }}>
+          <span className="tag">The Gap</span>
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 24, flexWrap: 'wrap' }}>
+            <div className="stat-num" style={{
+              fontSize: 'clamp(96px, 18vw, 220px)', fontWeight: 700, lineHeight: .88,
+              color: 'var(--a)', letterSpacing: '-.04em', transition: 'color .4s ease',
+            }}>73%</div>
+            <div style={{ paddingBottom: 16, maxWidth: 320 }}>
+              <div style={{ fontSize: 'clamp(20px, 2.5vw, 28px)', fontWeight: 600, lineHeight: 1.2, color: 'var(--txt)', marginBottom: 8, transition: 'color .4s ease' }}>
+                of reps go<br />unvalidated.
+              </div>
+              <p style={{ fontSize: 15, color: 'var(--sub)', lineHeight: 1.65, transition: 'color .4s ease' }}>
+                Training tools track inputs — not outcomes.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="div" style={{ marginBottom: 72 }} />
+
+        {/* 3 pain points */}
+        {[
+          ['Form', 'Equipment records sessions. It doesn\'t understand them.'],
+          ['Fatigue', 'Coaches estimate fatigue. Athletes push past failure without knowing.'],
+          ['Reps', 'No system validates quality in real time. Every partial rep counts the same.'],
+        ].map(([cat, line], i) => (
+          <div key={i} className="r" style={{ transitionDelay: `${.1 + i * .1}s` }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 28, padding: '28px 0' }}>
+              <div style={{ minWidth: 80 }}>
+                <span style={{ fontSize: 10, color: 'var(--a)', letterSpacing: '.18em', textTransform: 'uppercase', transition: 'color .4s ease' }}>{cat}</span>
+              </div>
+              <p style={{ fontSize: 'clamp(16px, 1.8vw, 20px)', color: 'var(--sub)', lineHeight: 1.65, fontWeight: 300, transition: 'color .4s ease' }}>{line}</p>
+            </div>
+            {i < 2 && <div className="div" />}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ─── Live Dashboard ───────────────────────────────────────────────────────────────
+function LiveDash() {
+  useReveal();
+  return (
+    <section className="sp sec" style={{
+      background: 'var(--bg2)', paddingTop: 180, paddingBottom: 180,
+      paddingLeft: 80, paddingRight: 80, transition: 'background .4s ease',
+    }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+        <div style={{ marginBottom: 64 }}>
+          <span className="tag r">Live Analytics</span>
+          <h2 className="r" style={{
+            fontSize: 'clamp(44px, 7vw, 80px)', fontWeight: 700,
+            letterSpacing: '-.028em', lineHeight: .98,
+            color: 'var(--txt)', transition: 'color .4s ease', transitionDelay: '.1s',
+          }}>Every rep.<br />Validated.</h2>
+        </div>
+
+        {/* Live dashboard UI mockup */}
+        <div className="r" style={{
+          background: 'var(--card)', border: '1px solid var(--bd)',
+          borderRadius: 24, overflow: 'hidden',
+          boxShadow: 'var(--sh)',
+          transition: 'background .4s ease, border-color .4s ease, box-shadow .4s ease',
+          transitionDelay: '.18s',
+        }}>
+          {/* Toolbar */}
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '14px 24px',
+            borderBottom: '1px solid var(--div)', background: 'var(--bg3)',
+            transition: 'background .4s ease',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span className="rec" style={{ width: 8, height: 8, borderRadius: '50%', background: '#ef4444', display: 'inline-block' }} />
+              <span style={{ fontSize: 11, color: 'var(--sub)', letterSpacing: '.12em', textTransform: 'uppercase', transition: 'color .4s ease' }}>
+                Live · Back Squat · Session 24
+              </span>
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--sub)', transition: 'color .4s ease' }}>Set 3 of 5  ·  Rep 12 of 15</div>
+          </div>
+
+          {/* Main metrics */}
+          <div className="g3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1, background: 'var(--div)' }}>
+            {[
+              { label: 'Clean Reps', value: '68', sub: 'This session', accent: false },
+              { label: 'Effort Consistency', value: '94%', sub: 'Above threshold', accent: false },
+              { label: 'Rep Quality', value: '●', sub: 'Solid', accent: true },
+            ].map(({ label, value, sub, accent }) => (
+              <div key={label} style={{ background: 'var(--card)', padding: '40px 36px', textAlign: 'center', transition: 'background .4s ease' }}>
+                <div style={{ fontSize: 9, color: 'var(--sub)', letterSpacing: '.18em', textTransform: 'uppercase', marginBottom: 12, transition: 'color .4s ease' }}>{label}</div>
+                {accent ? (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+                    <div className="rdot" style={{ width: 14, height: 14 }} />
+                    <span style={{ fontSize: 28, fontWeight: 700, color: 'var(--txt)', transition: 'color .4s ease' }}>Solid</span>
+                  </div>
+                ) : (
+                  <div style={{ fontSize: 'clamp(42px, 6vw, 64px)', fontWeight: 700, letterSpacing: '-.02em', color: 'var(--a)', lineHeight: 1, transition: 'color .4s ease' }}>{value}</div>
+                )}
+                <div style={{ fontSize: 12, color: 'var(--sub)', marginTop: 8, transition: 'color .4s ease' }}>{sub}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Waveform / rep bars */}
+          <div style={{ padding: '28px 36px', borderTop: '1px solid var(--div)' }}>
+            <div style={{ fontSize: 9, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 16, transition: 'color .4s ease' }}>
+              Rep Quality · Live
+            </div>
+            <div style={{ display: 'flex', gap: 3, alignItems: 'flex-end', height: 52 }}>
+              {Array.from({ length: 30 }, (_, i) => {
+                const h = i < 12 ? 44 + Math.sin(i * 0.8) * 6 : i < 20 ? 32 + Math.sin(i * 0.9) * 5 : i < 26 ? 22 + Math.sin(i * 1.1) * 4 : 14;
+                const c = i < 12 ? 'rgba(34,197,94,.6)' : i < 20 ? 'rgba(234,179,8,.6)' : i < 26 ? 'rgba(239,68,68,.55)' : 'rgba(255,255,255,.1)';
+                return <div key={i} style={{ flex: 1, height: h, borderRadius: 3, background: c }} />;
+              })}
+            </div>
+          </div>
+
+          {/* Bottom 4 mini cards */}
+          <div className="g2" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1, background: 'var(--div)', borderTop: '1px solid var(--div)' }}>
+            {[
+              ['Set Completion Confidence', '92%'],
+              ['Effort Drop-Off Risk', 'Low'],
+            ].map(([l, v]) => (
+              <div key={l} style={{ background: 'var(--card)', padding: '18px 36px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'background .4s ease' }}>
+                <span style={{ fontSize: 12, color: 'var(--sub)', transition: 'color .4s ease' }}>{l}</span>
+                <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--a)', transition: 'color .4s ease' }}>{v}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Post-Workout ─────────────────────────────────────────────────────────────────
+function PostWorkout() {
+  useReveal();
+  const cardRef = useRef(null), pathRef = useRef(null);
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    const c = cardRef.current, p = pathRef.current; if (!c || !p) return;
+    const io = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) {
+        c.classList.add('in'); p.classList.add('in');
+        const end = 68, dur = 1400, st = performance.now();
+        const tick = now => { const pr = Math.min((now - st) / dur, 1); setN(Math.round((1 - Math.pow(1 - pr, 3)) * end)); if (pr < 1) requestAnimationFrame(tick); };
+        requestAnimationFrame(tick); io.disconnect();
+      }
+    }, { threshold: .2 });
+    io.observe(c);
+    return () => io.disconnect();
+  }, []);
+
+  return (
+    <section className="sp sec" style={{
+      background: 'var(--bg)', paddingTop: 180, paddingBottom: 180,
+      paddingLeft: 80, paddingRight: 80, transition: 'background .4s ease',
+    }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+        <div style={{ marginBottom: 72, maxWidth: 600 }}>
+          <span className="tag r">Post-Workout Analytics</span>
+          <h2 className="r" style={{
+            fontSize: 'clamp(44px, 7vw, 80px)', fontWeight: 700,
+            letterSpacing: '-.028em', lineHeight: .98,
+            color: 'var(--txt)', transition: 'color .4s ease', transitionDelay: '.1s',
+          }}>Fatigue has<br />a pattern.</h2>
+        </div>
+
+        <div className="pw-sp" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64, alignItems: 'start' }}>
+          {/* Feature list */}
+          <div className="r" style={{ transitionDelay: '.18s' }}>
+            {[
+              ['Clean Reps Completed', 'Every validated rep stored per session.'],
+              ['Movement Quality State', 'Solid. Inconsistent. Breaking Down.'],
+              ['Fatigue & Form Degradation', 'Where form broke — not just when.'],
+              ['Effort Drop-Off Point', 'The exact rep where output declined.'],
+              ['Repetitive Stress Indicator', 'Catch compounding errors before injury.'],
+            ].map(([t, d], i) => (
+              <div key={i}>
+                <div style={{ display: 'flex', gap: 16, padding: '22px 0', alignItems: 'flex-start' }}>
+                  <span style={{ fontSize: 11, color: 'var(--dim)', paddingTop: 2, flexShrink: 0, fontVariantNumeric: 'tabular-nums', transition: 'color .4s ease' }}>0{i + 1}</span>
+                  <div>
+                    <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 5, color: 'var(--txt)', transition: 'color .4s ease' }}>{t}</div>
+                    <p style={{ fontSize: 13, color: 'var(--sub)', lineHeight: 1.65, transition: 'color .4s ease' }}>{d}</p>
+                  </div>
+                </div>
+                {i < 4 && <div className="div" />}
+              </div>
+            ))}
+            <div style={{ marginTop: 36 }}>
+              <div style={{ fontSize: 9, color: 'var(--dim)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 10, transition: 'color .4s ease' }}>
+                Form Degradation Curve
+              </div>
+              <svg viewBox="0 0 300 60" style={{ width: '100%', height: 60 }}>
+                <defs>
+                  <linearGradient id="fcg" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#4DFFEF" stopOpacity=".8" />
+                    <stop offset="55%" stopColor="#eab308" stopOpacity=".8" />
+                    <stop offset="100%" stopColor="#ef4444" stopOpacity=".8" />
+                  </linearGradient>
+                </defs>
+                <path ref={pathRef} className="fp"
+                  d="M8,8 Q44,8 78,10 Q114,14 146,22 Q180,32 208,46 Q236,58 278,60"
+                  stroke="url(#fcg)" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+              </svg>
+            </div>
+          </div>
+
+          {/* Summary card */}
+          <div>
+            <div ref={cardRef} className="sc sc-p" style={{
+              background: 'var(--card)', border: '1px solid var(--bd)',
+              borderRadius: 24, padding: 36,
+              boxShadow: 'var(--sh)',
+              transition: 'background .4s ease, border-color .4s ease, box-shadow .4s ease',
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
+                <div>
+                  <div style={{ fontSize: 9, color: 'var(--dim)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 4, transition: 'color .4s ease' }}>Post-Workout Summary</div>
+                  <div style={{ fontSize: 13, color: 'var(--sub)', transition: 'color .4s ease' }}>Back Squat · Session 24</div>
+                </div>
+                <div style={{ background: 'rgba(34,197,94,.07)', border: '1px solid rgba(34,197,94,.18)', borderRadius: 100, padding: '5px 14px' }}>
+                  <span style={{ fontSize: 11, color: '#22c55e', fontWeight: 500 }}>Solid</span>
+                </div>
+              </div>
+              <div style={{ borderBottom: '1px solid var(--div)', paddingBottom: 22, marginBottom: 22 }}>
+                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10 }}>
+                  <span style={{ fontSize: 72, fontWeight: 700, lineHeight: 1, fontVariantNumeric: 'tabular-nums', letterSpacing: '-.03em', color: 'var(--txt)', transition: 'color .4s ease' }}>{n}</span>
+                  <div style={{ paddingBottom: 10 }}>
+                    <div style={{ fontSize: 12, color: 'var(--a)', marginBottom: 3, fontWeight: 500, transition: 'color .4s ease' }}>+12 vs last session</div>
+                    <div style={{ fontSize: 9, color: 'var(--dim)', letterSpacing: '.14em', textTransform: 'uppercase', transition: 'color .4s ease' }}>Clean Reps</div>
+                  </div>
+                </div>
+              </div>
+              <div className="g3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10, marginBottom: 18 }}>
+                {[['Quality','Solid','#22c55e'],['Drop-Off','Rep 11','#eab308'],['Stress','Low','var(--a)']].map(([l,v,c]) => (
+                  <div key={l} style={{ background: 'var(--bg2)', borderRadius: 12, padding: '12px 10px', transition: 'background .4s ease' }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: c, marginBottom: 4, transition: 'color .4s ease' }}>{v}</div>
+                    <div style={{ fontSize: 9, color: 'var(--dim)', letterSpacing: '.1em', textTransform: 'uppercase', transition: 'color .4s ease' }}>{l}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ background: 'var(--bg2)', borderRadius: 12, padding: '14px 16px', transition: 'background .4s ease' }}>
+                <div style={{ fontSize: 9, color: 'var(--dim)', letterSpacing: '.14em', textTransform: 'uppercase', marginBottom: 10, transition: 'color .4s ease' }}>Rep Quality Breakdown</div>
+                <div style={{ display: 'flex', gap: 2, alignItems: 'flex-end' }}>
+                  {Array.from({ length: 20 }, (_, i) => (
+                    <div key={i} style={{ flex: 1, height: i < 12 ? 26 : i < 16 ? 19 : 12, borderRadius: 3, background: i < 12 ? 'rgba(34,197,94,.5)' : i < 16 ? 'rgba(234,179,8,.5)' : 'rgba(239,68,68,.45)' }} />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── How It Works ─────────────────────────────────────────────────────────────────
+function HowItWorks() {
+  useReveal();
+  return (
+    <section className="sp sec" style={{
+      background: 'var(--bg2)', paddingTop: 180, paddingBottom: 180,
+      paddingLeft: 80, paddingRight: 80, transition: 'background .4s ease',
+    }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+        <div style={{ marginBottom: 80 }}>
+          <span className="tag r">How It Works</span>
+          <h2 className="r" style={{
+            fontSize: 'clamp(44px, 7vw, 80px)', fontWeight: 700,
+            letterSpacing: '-.028em', lineHeight: .98,
+            color: 'var(--txt)', transition: 'color .4s ease', transitionDelay: '.1s',
+          }}>Three steps.<br />Zero friction.</h2>
+        </div>
+        {[
+          ['Camera pod captures movement', 'Fixed overhead or side-angle. No setup. No per-user calibration. Plug in, point, run.'],
+          ['AI extracts rep-level signals in real time', 'Joint angles, velocity curves, timing — rep by rep — as the set unfolds. Frame-level accuracy.'],
+          ['Intelligence delivered instantly', 'Live signals to the display in under 200ms. Full post-session analytics within seconds.'],
+        ].map(([title, desc], i) => (
+          <div key={i}>
+            <div className="step-g r" style={{ display: 'grid', gridTemplateColumns: '96px 1fr', gap: 40, padding: '52px 0', transitionDelay: `${.08 + i * .12}s` }}>
+              <span className="step-num" style={{ fontSize: 88, fontWeight: 700, lineHeight: 1, color: 'var(--num)', letterSpacing: '-.03em', userSelect: 'none', transition: 'color .4s ease' }}>
+                0{i + 1}
+              </span>
+              <div style={{ paddingTop: 10 }}>
+                <h3 style={{ fontSize: 'clamp(19px, 2vw, 24px)', fontWeight: 600, marginBottom: 12, color: 'var(--txt)', transition: 'color .4s ease' }}>{title}</h3>
+                <p style={{ fontSize: 15, color: 'var(--sub)', lineHeight: 1.75, maxWidth: 520, transition: 'color .4s ease' }}>{desc}</p>
+              </div>
+            </div>
+            {i < 2 && <div className="div" />}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ─── App Preview ─────────────────────────────────────────────────────────────────
+function AppPreview() {
+  useReveal();
+  return (
+    <section style={{ background: '#050505', overflow: 'hidden', position: 'relative' }}>
+      {/* Always-dark section — accent color and white text forced */}
+
+      {/* Headline */}
+      <div className="sp r" style={{
+        textAlign: 'center', paddingTop: 160, paddingBottom: 60,
+        paddingLeft: 48, paddingRight: 48,
+      }}>
+        <span style={{
+          display: 'inline-block', fontSize: 10, fontWeight: 500,
+          letterSpacing: '.2em', textTransform: 'uppercase',
+          color: '#4DFFEF', marginBottom: 20,
+        }}>
+          Platform Preview
+        </span>
+        <h2 style={{
+          fontSize: 'clamp(52px, 9vw, 116px)',
+          fontWeight: 700, lineHeight: .96,
+          letterSpacing: '-.032em',
+          color: '#4DFFEF',
+        }}>
+          Training intelligence,<br />
+          <span style={{ color: '#FFFFFF' }}>live.</span>
+        </h2>
+        <p className="r" style={{
+          fontSize: 'clamp(14px, 1.5vw, 17px)', color: '#4a4a4a',
+          maxWidth: 380, margin: '24px auto 0', lineHeight: 1.7, fontWeight: 300,
+          transitionDelay: '.1s',
+        }}>
+          Every rep. Every signal. Visible in real time — no equipment attached.
+        </p>
+      </div>
+
+      {/* Handset preview — live screen fitted into in-hand phone */}
+      <div className="app-hand-zone">
+        <div className="app-hand-glow" />
+        <div className="app-hand-wrap r" style={{ transitionDelay: '.16s' }}>
+          <div className="app-live-screen">
+            <video
+              src={DEMO_VIDEO}
+              autoPlay
+              muted
+              loop
+              playsInline
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            />
+          </div>
+          <img src={mobileHandImg} alt="Athlete holding Genyx live training intelligence mobile view" className="app-hand-img" />
+        </div>
+      </div>
+
+      {/* CTA */}
+      <div className="sp r" style={{
+        textAlign: 'center', paddingTop: 52, paddingBottom: 120,
+        paddingLeft: 48, paddingRight: 48, transitionDelay: '.2s',
+      }}>
+        <button style={{
+          background: 'transparent',
+          border: '1px solid rgba(77,255,239,.3)',
+          borderRadius: 100, padding: '14px 40px',
+          color: '#fff', fontSize: 13, fontWeight: 500, letterSpacing: '.06em',
+          cursor: 'none',
+          position: 'relative', overflow: 'hidden',
+          transition: 'color .38s ease',
+        }}
+          className="cp"
+        >
+          <span>Request Early Access</span>
+        </button>
+      </div>
+    </section>
+  );
+}
+
+// ─── Footer ────────────────────────────────────────────────────────────────────
+function Footer() {
+  useReveal();
+  return (
+    <footer style={{ background: 'var(--bg)', borderTop: '1px solid var(--div)', transition: 'background .4s ease, border-color .4s ease' }}>
+      <div className="sp" style={{ padding: '160px 80px', textAlign: 'center', maxWidth: 740, margin: '0 auto' }}>
+        <span className="tag r" style={{ display: 'block', textAlign: 'center' }}>Early Access</span>
+        <h2 className="r" style={{
+          fontSize: 'clamp(40px, 6vw, 72px)', fontWeight: 700,
+          letterSpacing: '-.028em', lineHeight: 1.02, marginBottom: 20,
+          color: 'var(--txt)', transition: 'color .4s ease', transitionDelay: '.1s',
+        }}>
+          Coaching-grade intelligence.<br />
+          <span style={{ color: 'var(--dim)', transition: 'color .4s ease' }}>At scale.</span>
+        </h2>
+        <p className="r" style={{ color: 'var(--sub)', fontSize: 16, lineHeight: 1.75, marginBottom: 48, transition: 'color .4s ease', transitionDelay: '.2s' }}>
+          Built for serious athletes, elite coaches, and performance facilities ready to move beyond guesswork.
+        </p>
+        <div className="r" style={{ transitionDelay: '.3s' }}>
+          <button className="cp" style={{
+            background: 'transparent', border: '1px solid var(--a)',
+            borderRadius: 100, padding: '16px 52px',
+            color: 'var(--txt)', fontSize: 13, fontWeight: 500, letterSpacing: '.07em',
+            transition: 'color .4s ease, border-color .4s ease',
+          }}>
+            <span>Request Early Access</span>
+          </button>
+        </div>
+      </div>
+
+      <div className="sp" style={{
+        borderTop: '1px solid var(--div)', padding: '26px 80px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        flexWrap: 'wrap', gap: 16, transition: 'border-color .4s ease',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <svg width="13" height="13" viewBox="0 0 20 20" fill="none">
+            <polygon points="10,1.5 18.5,6 18.5,14 10,18.5 1.5,14 1.5,6" style={{ stroke: 'var(--a)' }} strokeWidth="1.4" fill="none" />
+          </svg>
+          <span style={{ fontWeight: 600, fontSize: 11, letterSpacing: '.12em', color: 'var(--txt)', transition: 'color .4s ease' }}>GENYX</span>
+        </div>
+        <div style={{ display: 'flex', gap: 28 }}>
+          {['Privacy', 'Terms', 'Contact'].map(l => <a key={l} href="#" className="nl" style={{ fontSize: 12 }}>{l}</a>)}
+        </div>
+        <span style={{ fontSize: 11, color: 'var(--dim)', letterSpacing: '.07em', transition: 'color .4s ease' }}>Movement is data. Data is truth.</span>
+      </div>
+    </footer>
+  );
+}
+
+// ─── About Page ───────────────────────────────────────────────────────────────────
+function AboutPage() {
+  useReveal();
+  return (
+    <>
+      {/* Hero */}
+      <section className="sp" style={{
+        minHeight: '85vh', display: 'flex', alignItems: 'center',
+        background: 'var(--bg)', paddingTop: 140, paddingBottom: 120,
+        paddingLeft: 80, paddingRight: 80, transition: 'background .4s ease',
+        position: 'relative', overflow: 'hidden',
+      }}>
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse 65% 55% at 50% 50%, rgba(77,255,239,.016) 0%, transparent 70%)' }} />
+        <div style={{ maxWidth: 1100, margin: '0 auto', width: '100%', position: 'relative', zIndex: 1 }}>
+          <span className="tag r">About Genyx</span>
+          <h1 className="r" style={{
+            fontSize: 'clamp(56px, 10vw, 120px)', fontWeight: 700,
+            lineHeight: .95, letterSpacing: '-.034em',
+            color: 'var(--txt)', transition: 'color .4s ease', transitionDelay: '.08s',
+            maxWidth: 900,
+          }}>
+            Built for the<br /><span style={{ color: 'var(--a)', transition: 'color .4s ease' }}>pursuit.</span>
+          </h1>
+          <p className="r" style={{
+            fontSize: 'clamp(16px, 1.8vw, 20px)', color: 'var(--sub)', lineHeight: 1.72,
+            maxWidth: 560, marginTop: 40, fontWeight: 300, transition: 'color .4s ease',
+            transitionDelay: '.18s',
+          }}>
+            Genyx was built on a single conviction: coaches and athletes deserve the same precision sports science that elite labs have — without the lab, the wearables, or the setup.
+          </p>
+        </div>
+      </section>
+
+      {/* The problem */}
+      <section className="sp" style={{
+        background: 'var(--bg2)', paddingTop: 140, paddingBottom: 140,
+        paddingLeft: 80, paddingRight: 80, transition: 'background .4s ease',
+      }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <span className="tag r">The Problem We Solve</span>
+          <div className="r" style={{ transitionDelay: '.08s' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 24, flexWrap: 'wrap', marginBottom: 56 }}>
+              <div style={{ fontSize: 'clamp(80px, 16vw, 180px)', fontWeight: 700, lineHeight: .88, color: 'var(--a)', letterSpacing: '-.04em', transition: 'color .4s ease' }}>73%</div>
+              <div style={{ paddingBottom: 16, maxWidth: 380 }}>
+                <div style={{ fontSize: 'clamp(20px, 2.5vw, 28px)', fontWeight: 600, lineHeight: 1.2, color: 'var(--txt)', marginBottom: 12, transition: 'color .4s ease' }}>
+                  of reps go unvalidated<br />in every training session.
+                </div>
+                <p style={{ fontSize: 15, color: 'var(--sub)', lineHeight: 1.65, transition: 'color .4s ease' }}>
+                  Existing tools count inputs — sets, reps, weight. None of them understand movement quality. That's the gap Genyx was built to close.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="div" style={{ marginBottom: 56 }} />
+          {[
+            ['The Equipment Problem', 'Gym equipment records that a session happened. Barbells don\'t know if your hips shifted on rep 8. Cables don\'t know if your form degraded under fatigue. Hardware tracks inputs — never outcomes.'],
+            ['The Coach Problem', 'Even elite coaches can\'t watch every rep of every set across every athlete simultaneously. Visual observation has limits. Fatigue is estimated. Form breaks are caught after, not during.'],
+            ['The Data Problem', 'Wearables require attachment, calibration, and maintenance per athlete. They measure proximity and acceleration — not movement mechanics. Rep quality has never been measurable at scale. Until now.'],
+          ].map(([cat, line], i) => (
+            <div key={i} className="r" style={{ transitionDelay: `${.1 + i * .1}s` }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 28, padding: '28px 0' }}>
+                <div style={{ minWidth: 100, flexShrink: 0 }}>
+                  <span style={{ fontSize: 10, color: 'var(--a)', letterSpacing: '.18em', textTransform: 'uppercase', transition: 'color .4s ease' }}>{cat.split(' ')[1]}</span>
+                </div>
+                <p style={{ fontSize: 'clamp(15px, 1.7vw, 19px)', color: 'var(--sub)', lineHeight: 1.68, fontWeight: 300, transition: 'color .4s ease' }}>{line}</p>
+              </div>
+              {i < 2 && <div className="div" />}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* The technology */}
+      <section className="sp" style={{
+        background: 'var(--bg)', paddingTop: 140, paddingBottom: 140,
+        paddingLeft: 80, paddingRight: 80, transition: 'background .4s ease',
+      }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <span className="tag r">The Technology</span>
+          <h2 className="r" style={{ fontSize: 'clamp(44px, 7vw, 80px)', fontWeight: 700, letterSpacing: '-.028em', lineHeight: .98, marginBottom: 64, color: 'var(--txt)', transition: 'color .4s ease', transitionDelay: '.08s' }}>
+            Computer vision.<br />No compromises.
+          </h2>
+          <div className="r" style={{ transitionDelay: '.16s', marginBottom: 80 }}>
+            <p style={{ fontSize: 'clamp(16px, 1.8vw, 20px)', color: 'var(--sub)', lineHeight: 1.72, maxWidth: 720, fontWeight: 300, transition: 'color .4s ease' }}>
+              The Genyx Pod uses an Arducam 1080P camera module inside a custom-built, precision-machined housing. Mounted on a weighted aluminum floor stand with ball-head articulation and height adjustment from 0.9m to 1.6m, it deploys in minutes — in any facility, for any athlete. The AI processes every frame locally and delivers coaching signals in under 200 milliseconds.
+            </p>
+          </div>
+          <div className="g2r" style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 1, background: 'var(--div)', borderRadius: 20, overflow: 'hidden' }}>
+            {[
+              ['Arducam 1080P', 'Custom grey housing', 'The vision module at the heart of the Pod. High frame rate, low latency, optimized for movement capture in gym lighting conditions.'],
+              ['Computer Vision AI', 'Frame-level accuracy', 'Joint angle extraction, velocity measurement, range-of-motion tracking — all without body-worn sensors. Processed rep by rep.'],
+              ['< 200ms Latency', 'Live coaching feedback', 'Signals are processed and delivered to the coaching display before a rep completes. Feedback that changes behavior in real time.'],
+              ['Zero Calibration', 'Any athlete, instantly', 'No setup per user. No body measurements entered. A new athlete walks in — the system reads their movement from frame one.'],
+            ].map(([title, sub, desc], i) => (
+              <div key={i} className="r" style={{ background: 'var(--card)', padding: '44px 40px', transition: 'background .4s ease', transitionDelay: `${.08 + i * .08}s` }}>
+                <div style={{ fontSize: 12, color: 'var(--a)', letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 8, transition: 'color .4s ease' }}>{sub}</div>
+                <h3 style={{ fontSize: 20, fontWeight: 600, marginBottom: 12, color: 'var(--txt)', transition: 'color .4s ease' }}>{title}</h3>
+                <p style={{ fontSize: 14, color: 'var(--sub)', lineHeight: 1.72, fontWeight: 300, transition: 'color .4s ease' }}>{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Quote */}
+      <section className="sp" style={{
+        background: 'var(--bg2)', paddingTop: 120, paddingBottom: 120,
+        paddingLeft: 80, paddingRight: 80, transition: 'background .4s ease',
+      }}>
+        <div style={{ maxWidth: 900, margin: '0 auto' }}>
+          <blockquote className="r" style={{
+            fontSize: 'clamp(20px, 2.8vw, 34px)', fontWeight: 300,
+            lineHeight: 1.65, color: 'var(--txt)', letterSpacing: '-.01em',
+            transition: 'color .4s ease',
+          }}>
+            "Movement is the most honest signal of human performance.<br />We built the intelligence to read it."
+          </blockquote>
+          <div className="r" style={{ marginTop: 32, display: 'flex', alignItems: 'center', gap: 16, transitionDelay: '.12s' }}>
+            <div className="div" style={{ width: 40, flex: 'none' }} />
+            <span style={{ fontSize: 12, color: 'var(--sub)', letterSpacing: '.12em', textTransform: 'uppercase', transition: 'color .4s ease' }}>Genyx, 2025</span>
+          </div>
+        </div>
+      </section>
+
+      {/* Principles */}
+      <section className="sp" style={{
+        background: 'var(--bg)', paddingTop: 140, paddingBottom: 140,
+        paddingLeft: 80, paddingRight: 80, transition: 'background .4s ease',
+      }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <span className="tag r">Principles</span>
+          <h2 className="r" style={{ fontSize: 'clamp(44px, 7vw, 80px)', fontWeight: 700, letterSpacing: '-.028em', lineHeight: .98, marginBottom: 80, color: 'var(--txt)', transition: 'color .4s ease', transitionDelay: '.08s' }}>Three principles.</h2>
+          <div className="g3r" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 1, background: 'var(--div)', borderRadius: 20, overflow: 'hidden' }}>
+            {[
+              ['Precision', 'Every rep is a data point. Every session tells a story. We read both at frame-level resolution — not by approximation.'],
+              ['Accessibility', 'No wearables. No calibration. No friction between the athlete and accurate data. Intelligence that works the moment you do.'],
+              ['Integrity', 'We build for coaches who demand truth — not dashboards that confirm what you already believe. Data should challenge, not validate.'],
+            ].map(([title, desc], i) => (
+              <div key={i} className="r" style={{ background: 'var(--card)', padding: '48px 40px', transition: 'background .4s ease', transitionDelay: `${.08 + i * .1}s` }}>
+                <div style={{ fontSize: 'clamp(40px,6vw,72px)', fontWeight: 700, color: 'var(--num)', letterSpacing: '-.03em', marginBottom: 28, transition: 'color .4s ease' }}>0{i + 1}</div>
+                <h3 style={{ fontSize: 20, fontWeight: 600, marginBottom: 14, color: 'var(--txt)', transition: 'color .4s ease' }}>{title}</h3>
+                <p style={{ fontSize: 14, color: 'var(--sub)', lineHeight: 1.72, fontWeight: 300, transition: 'color .4s ease' }}>{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Stat strip */}
+      <section className="sp" style={{
+        background: 'var(--bg2)', paddingTop: 100, paddingBottom: 100,
+        paddingLeft: 80, paddingRight: 80, transition: 'background .4s ease',
+      }}>
+        <div className="g4r" style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 1, background: 'var(--div)', borderRadius: 20, overflow: 'hidden' }}>
+          {[['< 200ms', 'Live coaching latency'], ['1080P', 'Arducam vision module'], ['0', 'Wearables required'], ['73%', 'Reps that go unvalidated today']].map(([stat, label]) => (
+            <div key={stat} className="r" style={{ background: 'var(--card)', padding: '52px 32px', textAlign: 'center', transition: 'background .4s ease' }}>
+              <div style={{ fontSize: 'clamp(30px, 4vw, 48px)', fontWeight: 700, color: 'var(--a)', letterSpacing: '-.02em', marginBottom: 10, transition: 'color .4s ease' }}>{stat}</div>
+              <div style={{ fontSize: 12, color: 'var(--sub)', letterSpacing: '.06em', lineHeight: 1.5, transition: 'color .4s ease' }}>{label}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <Footer />
+    </>
+  );
+}
+
+// ─── Contact Page ─────────────────────────────────────────────────────────────────
+function ContactPage() {
+  useReveal();
+  const [form, setForm] = useState({ name: '', email: '', facility: '', message: '' });
+  const [sent, setSent] = useState(false);
+
+  const upd = k => e => setForm(f => ({ ...f, [k]: e.target.value }));
+
+  return (
+    <>
+      <section className="sp" style={{
+        minHeight: '100vh', display: 'flex', alignItems: 'center',
+        background: 'var(--bg)', paddingTop: 120, paddingBottom: 120,
+        paddingLeft: 80, paddingRight: 80, transition: 'background .4s ease',
+      }}>
+        <div className="pw-sp" style={{ maxWidth: 1100, margin: '0 auto', width: '100%', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, alignItems: 'start' }}>
+          {/* Left */}
+          <div>
+            <span className="tag r">Early Access</span>
+            <h1 className="r" style={{
+              fontSize: 'clamp(48px, 8vw, 100px)', fontWeight: 700,
+              lineHeight: .95, letterSpacing: '-.034em',
+              color: 'var(--txt)', transition: 'color .4s ease', transitionDelay: '.08s',
+              marginBottom: 32,
+            }}>
+              Get early<br /><span style={{ color: 'var(--a)', transition: 'color .4s ease' }}>access.</span>
+            </h1>
+            <p className="r" style={{
+              fontSize: 'clamp(15px, 1.6vw, 18px)', color: 'var(--sub)', lineHeight: 1.72,
+              fontWeight: 300, transition: 'color .4s ease', transitionDelay: '.16s',
+            }}>
+              Join the waitlist for coaches and performance facilities building the future of training. We're onboarding a select cohort now.
+            </p>
+            <div className="r" style={{ marginTop: 48, display: 'flex', flexDirection: 'column', gap: 16, transitionDelay: '.24s' }}>
+              {[['Response time', '< 48 hours'], ['Access type', 'Pilot program'], ['Cost', 'Free during beta']].map(([k, v]) => (
+                <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '14px 0', borderBottom: '1px solid var(--div)' }}>
+                  <span style={{ fontSize: 13, color: 'var(--sub)', transition: 'color .4s ease' }}>{k}</span>
+                  <span style={{ fontSize: 13, color: 'var(--a)', fontWeight: 500, transition: 'color .4s ease' }}>{v}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Right — form */}
+          <div className="r" style={{ transitionDelay: '.12s' }}>
+            {sent ? (
+              <div style={{
+                background: 'var(--card)', border: '1px solid var(--bd)', borderRadius: 24,
+                padding: '72px 48px', textAlign: 'center', transition: 'background .4s ease, border-color .4s ease',
+              }}>
+                <div style={{ fontSize: 48, marginBottom: 24 }}>✓</div>
+                <h3 style={{ fontSize: 24, fontWeight: 600, color: 'var(--txt)', marginBottom: 12, transition: 'color .4s ease' }}>You're on the list.</h3>
+                <p style={{ fontSize: 15, color: 'var(--sub)', lineHeight: 1.65, transition: 'color .4s ease' }}>We'll be in touch within 48 hours.</p>
+              </div>
+            ) : (
+              <form onSubmit={e => { e.preventDefault(); setSent(true); }} style={{
+                background: 'var(--card)', border: '1px solid var(--bd)', borderRadius: 24,
+                padding: '48px 40px', display: 'flex', flexDirection: 'column', gap: 16,
+                transition: 'background .4s ease, border-color .4s ease',
+              }}>
+                <div>
+                  <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8, transition: 'color .4s ease' }}>Your Name</div>
+                  <input className="fi" type="text" placeholder="Full name" value={form.name} onChange={upd('name')} required />
+                </div>
+                <div>
+                  <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8, transition: 'color .4s ease' }}>Email Address</div>
+                  <input className="fi" type="email" placeholder="you@yourgym.com" value={form.email} onChange={upd('email')} required />
+                </div>
+                <div>
+                  <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8, transition: 'color .4s ease' }}>Gym / Facility Name</div>
+                  <input className="fi" type="text" placeholder="Your gym or facility" value={form.facility} onChange={upd('facility')} />
+                </div>
+                <div>
+                  <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8, transition: 'color .4s ease' }}>Message (optional)</div>
+                  <textarea className="fi" placeholder="Tell us about your training setup…" rows={4} value={form.message} onChange={upd('message')} />
+                </div>
+                <button type="submit" className="cp" style={{
+                  marginTop: 8, background: 'var(--at)', border: '1px solid var(--a)',
+                  borderRadius: 12, padding: '16px 32px',
+                  color: 'var(--a)', fontSize: 13, fontWeight: 500, letterSpacing: '.06em',
+                  transition: 'color .38s ease, border-color .4s ease, background .4s ease',
+                }}>
+                  <span>Request Early Access →</span>
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <Footer />
+    </>
+  );
+}
+
+// ─── Platform Page ────────────────────────────────────────────────────────────────
+function PlatformPage() {
+  useReveal();
+  return (
+    <>
+      {/* Hero */}
+      <section className="sp" style={{
+        minHeight: '88vh', display: 'flex', alignItems: 'center',
+        background: 'var(--bg)', paddingTop: 140, paddingBottom: 120,
+        paddingLeft: 80, paddingRight: 80, transition: 'background .4s ease',
+        position: 'relative', overflow: 'hidden',
+      }}>
+        {/* Subtle grid backdrop */}
+        <div style={{
+          position: 'absolute', inset: 0, pointerEvents: 'none',
+          background: 'radial-gradient(ellipse 70% 60% at 50% 50%, rgba(77,255,239,.018) 0%, transparent 70%)',
+        }} />
+        <div style={{ maxWidth: 1100, margin: '0 auto', width: '100%', position: 'relative', zIndex: 1 }}>
+          <span className="tag r">The Platform</span>
+          <h1 className="r" style={{
+            fontSize: 'clamp(56px, 10vw, 118px)', fontWeight: 700,
+            lineHeight: .95, letterSpacing: '-.034em',
+            color: 'var(--txt)', transition: 'color .4s ease', transitionDelay: '.08s',
+            maxWidth: 860,
+          }}>
+            Intelligence built<br />
+            <span style={{ color: 'var(--a)', transition: 'color .4s ease' }}>for movement.</span>
+          </h1>
+          <p className="r" style={{
+            fontSize: 'clamp(16px, 1.8vw, 20px)', color: 'var(--sub)', lineHeight: 1.72,
+            maxWidth: 500, marginTop: 40, fontWeight: 300, transition: 'color .4s ease',
+            transitionDelay: '.18s',
+          }}>
+            Genyx turns a fixed camera into a full-stack coaching system. No wearables. No manual logging. No friction.
+          </p>
+          {/* Stat row */}
+          <div className="r" style={{ marginTop: 64, display: 'flex', gap: 56, flexWrap: 'wrap', transitionDelay: '.28s' }}>
+            {[['< 200ms', 'Live latency'], ['1080P', 'Vision module'], ['0', 'Wearables'], ['∞', 'Athletes per pod']].map(([v, l]) => (
+              <div key={l}>
+                <div style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 700, color: 'var(--a)', letterSpacing: '-.02em', lineHeight: 1, transition: 'color .4s ease' }}>{v}</div>
+                <div style={{ fontSize: 11, color: 'var(--sub)', marginTop: 6, letterSpacing: '.1em', textTransform: 'uppercase', transition: 'color .4s ease' }}>{l}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section className="sp" style={{
+        background: 'var(--bg2)', paddingTop: 140, paddingBottom: 140,
+        paddingLeft: 80, paddingRight: 80, transition: 'background .4s ease',
+      }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <span className="tag r">How It Works</span>
+          <h2 className="r" style={{
+            fontSize: 'clamp(44px, 7vw, 80px)', fontWeight: 700,
+            letterSpacing: '-.028em', lineHeight: .98, marginBottom: 80,
+            color: 'var(--txt)', transition: 'color .4s ease', transitionDelay: '.08s',
+          }}>Capture. Analyze.<br />Deliver.</h2>
+
+          {[
+            ['Capture', 'The Genyx Pod mounts in your facility — floor stand or fixed. Point it at the platform. No per-athlete setup. No wearables. The 1080P Arducam vision module starts reading movement the moment training begins.'],
+            ['Analyze', 'Computer vision AI processes every frame in real time. Joint angles, velocity curves, rep timing, range of motion — extracted rep by rep. The system understands the difference between a clean lift and a compromised one.'],
+            ['Deliver', 'Signals reach your display in under 200ms. Coaches see quality scores, fatigue state, and rep-level data live — while the set is happening. Full analytics hit the dashboard the moment the session ends.'],
+          ].map(([title, desc], i) => (
+            <div key={i}>
+              <div className="step-g r" style={{ display: 'grid', gridTemplateColumns: '96px 1fr', gap: 40, padding: '52px 0', transitionDelay: `${.08 + i * .12}s` }}>
+                <span className="step-num" style={{ fontSize: 88, fontWeight: 700, lineHeight: 1, color: 'var(--num)', letterSpacing: '-.03em', userSelect: 'none', transition: 'color .4s ease' }}>
+                  0{i + 1}
+                </span>
+                <div style={{ paddingTop: 10 }}>
+                  <h3 style={{ fontSize: 'clamp(20px, 2.2vw, 26px)', fontWeight: 600, marginBottom: 14, color: 'var(--txt)', transition: 'color .4s ease' }}>{title}</h3>
+                  <p style={{ fontSize: 15, color: 'var(--sub)', lineHeight: 1.75, maxWidth: 560, transition: 'color .4s ease' }}>{desc}</p>
+                </div>
+              </div>
+              {i < 2 && <div className="div" />}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Hardware section */}
+      <section className="sp" style={{
+        background: 'var(--bg)', paddingTop: 140, paddingBottom: 0,
+        paddingLeft: 80, paddingRight: 80, transition: 'background .4s ease',
+      }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <span className="tag r">The Hardware</span>
+          <div className="r" style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 24, marginBottom: 56, transitionDelay: '.08s' }}>
+            <h2 style={{ fontSize: 'clamp(44px, 7vw, 88px)', fontWeight: 700, letterSpacing: '-.032em', lineHeight: .98, color: 'var(--txt)', transition: 'color .4s ease' }}>
+              The Pod.
+            </h2>
+            <p style={{ fontSize: 'clamp(14px, 1.4vw, 17px)', color: 'var(--sub)', maxWidth: 340, lineHeight: 1.72, fontWeight: 300, paddingBottom: 6, transition: 'color .4s ease' }}>
+              Precision-built for performance environments. Weighted aluminum base. Ball-head articulation. Internal cable management.
+            </p>
+          </div>
+          <div className="r" style={{ position: 'relative', borderRadius: '20px 20px 0 0', overflow: 'hidden', aspectRatio: '16/7', transitionDelay: '.15s' }}>
+            <img src={podImg} alt="Genyx Pod in gym" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 55%', display: 'block' }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.1) 45%, rgba(0,0,0,0.35) 100%)' }} />
+            <div style={{ position: 'absolute', bottom: 32, left: 36 }}>
+              <span style={{ fontSize: 9, color: 'rgba(77,255,239,.8)', letterSpacing: '.2em', textTransform: 'uppercase', display: 'block', marginBottom: 4 }}>Genyx Pod — Floor Stand</span>
+              <span style={{ fontSize: 16, fontWeight: 600, color: '#fff' }}>Deploy anywhere. Zero configuration.</span>
+            </div>
+            <div style={{ position: 'absolute', top: 24, right: 24, display: 'flex', alignItems: 'center', gap: 7, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 100, padding: '6px 14px' }}>
+              <span className="rec" style={{ width: 7, height: 7, borderRadius: '50%', background: '#ef4444', display: 'inline-block' }} />
+              <span style={{ fontSize: 11, color: '#fff', letterSpacing: '.1em', fontWeight: 500 }}>LIVE</span>
+            </div>
+          </div>
+          <div className="pod-strip r" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, background: 'var(--div)', borderRadius: '0 0 20px 20px', overflow: 'hidden', marginBottom: 140, transitionDelay: '.25s' }}>
+            {[['Computer Vision AI', 'Arducam 1080P module'], ['< 200ms Latency', 'Frame-level processing'], ['Zero Wearables', 'No athlete setup required'], ['Multi-Location', 'One dashboard, every pod']].map(([title, sub]) => (
+              <div key={title} style={{ background: 'var(--bg3)', padding: '28px 24px', transition: 'background .4s ease' }}>
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--txt)', marginBottom: 5, transition: 'color .4s ease' }}>{title}</div>
+                <div style={{ fontSize: 12, color: 'var(--sub)', transition: 'color .4s ease' }}>{sub}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Platform features */}
+      <section className="sp" style={{
+        background: 'var(--bg2)', paddingTop: 140, paddingBottom: 140,
+        paddingLeft: 80, paddingRight: 80, transition: 'background .4s ease',
+      }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <span className="tag r">Platform Features</span>
+          <h2 className="r" style={{ fontSize: 'clamp(44px, 7vw, 80px)', fontWeight: 700, letterSpacing: '-.028em', lineHeight: .98, marginBottom: 72, color: 'var(--txt)', transition: 'color .4s ease', transitionDelay: '.08s' }}>
+            Built different.
+          </h2>
+          <div className="g2" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1, background: 'var(--div)', borderRadius: 20, overflow: 'hidden' }}>
+            {[
+              ['Zero Wearables', 'Athletes train without attaching anything. No sensors. No bands. No friction before a session starts.'],
+              ['Any Athlete, Instantly', 'No per-user calibration. A new athlete walks in — the system reads them immediately.'],
+              ['Multi-Location Ready', 'Deploy pods across facilities. All sessions flow into one dashboard. One view of your entire operation.'],
+              ['Sub-200ms Live Signals', 'Coaching feedback reaches the display before a rep is finished. Real-time means real-time.'],
+              ['Session-Level History', 'Every rep from every session is stored. Track improvement, fatigue patterns, and injury risk across weeks.'],
+              ['Coach + Athlete Views', 'Separate views for coaching staff and athletes. The right data, in the right hands, at the right time.'],
+            ].map(([title, desc], i) => (
+              <div key={i} className="r dc" style={{ borderRadius: 0, border: 'none', transitionDelay: `${.06 + i * .07}s` }}>
+                <h3 style={{ fontSize: 17, fontWeight: 600, marginBottom: 12, color: 'var(--txt)', transition: 'color .4s ease' }}>{title}</h3>
+                <p style={{ fontSize: 14, color: 'var(--sub)', lineHeight: 1.72, fontWeight: 300, transition: 'color .4s ease' }}>{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <Footer />
+    </>
+  );
+}
+
+// ─── Analytics Page ───────────────────────────────────────────────────────────────
+function AnalyticsPage() {
+  useReveal();
+  return (
+    <>
+      {/* Hero */}
+      <section className="sp" style={{
+        minHeight: '80vh', display: 'flex', alignItems: 'center',
+        background: 'var(--bg)', paddingTop: 140, paddingBottom: 120,
+        paddingLeft: 80, paddingRight: 80, transition: 'background .4s ease',
+      }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
+          <span className="tag r">Analytics</span>
+          <h1 className="r" style={{
+            fontSize: 'clamp(56px, 10vw, 118px)', fontWeight: 700,
+            lineHeight: .95, letterSpacing: '-.034em',
+            color: 'var(--txt)', transition: 'color .4s ease', transitionDelay: '.08s',
+            maxWidth: 900,
+          }}>
+            Every rep<br />
+            <span style={{ color: 'var(--a)', transition: 'color .4s ease' }}>tells a story.</span>
+          </h1>
+          <p className="r" style={{
+            fontSize: 'clamp(16px, 1.8vw, 20px)', color: 'var(--sub)', lineHeight: 1.72,
+            maxWidth: 500, marginTop: 40, fontWeight: 300, transition: 'color .4s ease',
+            transitionDelay: '.18s',
+          }}>
+            Genyx analytics go beyond rep counts. We track quality, fatigue, velocity, and form — session by session, rep by rep.
+          </p>
+        </div>
+      </section>
+
+      {/* What we track */}
+      <section className="sp" style={{
+        background: 'var(--bg2)', paddingTop: 140, paddingBottom: 140,
+        paddingLeft: 80, paddingRight: 80, transition: 'background .4s ease',
+      }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <span className="tag r">What We Track</span>
+          <h2 className="r" style={{ fontSize: 'clamp(44px, 7vw, 80px)', fontWeight: 700, letterSpacing: '-.028em', lineHeight: .98, marginBottom: 72, color: 'var(--txt)', transition: 'color .4s ease', transitionDelay: '.08s' }}>
+            The full picture.
+          </h2>
+          <div className="g3r" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1, background: 'var(--div)', borderRadius: 20, overflow: 'hidden' }}>
+            {[
+              ['Form Quality', 'Rep-by-rep scoring of movement mechanics. Clean, Inconsistent, or Breaking Down — classified per set.'],
+              ['Fatigue State', 'Detects velocity loss and range-of-motion decline as they happen. Catch breakdown before failure.'],
+              ['Clean Reps', 'Only reps that meet quality thresholds are counted as clean. Partial reps and form breaks are flagged.'],
+              ['Velocity Curves', 'Bar path and joint velocity plotted across every rep of every set. See where speed drops.'],
+              ['Joint Angles', 'Hip, knee, and shoulder angles tracked at key phases of each lift — without any body-worn sensors.'],
+              ['Effort Drop-Off', 'The exact rep where output declined. Not an estimate — derived from frame-level movement data.'],
+            ].map(([title, desc], i) => (
+              <div key={i} className="r" style={{
+                background: 'var(--card)', padding: '40px 36px',
+                transition: 'background .4s ease', transitionDelay: `${.06 + i * .08}s`,
+              }}>
+                <div style={{ fontSize: 'clamp(28px, 4vw, 48px)', fontWeight: 700, color: 'var(--num)', letterSpacing: '-.03em', marginBottom: 20, transition: 'color .4s ease' }}>0{i + 1}</div>
+                <h3 style={{ fontSize: 17, fontWeight: 600, marginBottom: 10, color: 'var(--txt)', transition: 'color .4s ease' }}>{title}</h3>
+                <p style={{ fontSize: 13, color: 'var(--sub)', lineHeight: 1.72, fontWeight: 300, transition: 'color .4s ease' }}>{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Live dashboard preview */}
+      <section className="sp" style={{
+        background: 'var(--bg)', paddingTop: 140, paddingBottom: 140,
+        paddingLeft: 80, paddingRight: 80, transition: 'background .4s ease',
+      }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <div style={{ marginBottom: 64 }}>
+            <span className="tag r">Live Dashboard</span>
+            <h2 className="r" style={{ fontSize: 'clamp(44px, 7vw, 80px)', fontWeight: 700, letterSpacing: '-.028em', lineHeight: .98, color: 'var(--txt)', transition: 'color .4s ease', transitionDelay: '.1s' }}>
+              While it's<br />happening.
+            </h2>
+          </div>
+
+          <div className="r" style={{ background: 'var(--card)', border: '1px solid var(--bd)', borderRadius: 24, overflow: 'hidden', boxShadow: 'var(--sh)', transition: 'background .4s ease, border-color .4s ease', transitionDelay: '.18s' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 24px', borderBottom: '1px solid var(--div)', background: 'var(--bg3)', transition: 'background .4s ease' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span className="rec" style={{ width: 8, height: 8, borderRadius: '50%', background: '#ef4444', display: 'inline-block' }} />
+                <span style={{ fontSize: 11, color: 'var(--sub)', letterSpacing: '.12em', textTransform: 'uppercase', transition: 'color .4s ease' }}>Live · Deadlift · Session 31</span>
+              </div>
+              <span style={{ fontSize: 11, color: 'var(--sub)', transition: 'color .4s ease' }}>Set 4 of 5  ·  Rep 8 of 10</span>
+            </div>
+            <div className="g3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1, background: 'var(--div)' }}>
+              {[
+                { label: 'Clean Reps', value: '42', sub: 'This session' },
+                { label: 'Form Score', value: '88%', sub: 'Above threshold' },
+                { label: 'Fatigue State', value: 'Solid', sub: 'No drop-off detected', accent: true },
+              ].map(({ label, value, sub, accent }) => (
+                <div key={label} style={{ background: 'var(--card)', padding: '40px 36px', textAlign: 'center', transition: 'background .4s ease' }}>
+                  <div style={{ fontSize: 9, color: 'var(--sub)', letterSpacing: '.18em', textTransform: 'uppercase', marginBottom: 12, transition: 'color .4s ease' }}>{label}</div>
+                  {accent ? (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+                      <div className="rdot" style={{ width: 14, height: 14 }} />
+                      <span style={{ fontSize: 28, fontWeight: 700, color: 'var(--txt)', transition: 'color .4s ease' }}>{value}</span>
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: 'clamp(42px, 6vw, 64px)', fontWeight: 700, letterSpacing: '-.02em', color: 'var(--a)', lineHeight: 1, transition: 'color .4s ease' }}>{value}</div>
+                  )}
+                  <div style={{ fontSize: 12, color: 'var(--sub)', marginTop: 8, transition: 'color .4s ease' }}>{sub}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ padding: '28px 36px', borderTop: '1px solid var(--div)' }}>
+              <div style={{ fontSize: 9, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 16, transition: 'color .4s ease' }}>Rep Quality · Live</div>
+              <div style={{ display: 'flex', gap: 3, alignItems: 'flex-end', height: 52 }}>
+                {Array.from({ length: 32 }, (_, i) => {
+                  const h = i < 14 ? 46 + Math.sin(i * 0.7) * 5 : i < 22 ? 34 + Math.sin(i * 0.9) * 4 : i < 28 ? 22 + Math.sin(i * 1.1) * 4 : 12;
+                  const c = i < 14 ? 'rgba(34,197,94,.6)' : i < 22 ? 'rgba(234,179,8,.6)' : i < 28 ? 'rgba(239,68,68,.55)' : 'rgba(255,255,255,.1)';
+                  return <div key={i} style={{ flex: 1, height: h, borderRadius: 3, background: c }} />;
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Post-session strip */}
+      <section className="sp" style={{
+        background: 'var(--bg2)', paddingTop: 100, paddingBottom: 100,
+        paddingLeft: 80, paddingRight: 80, transition: 'background .4s ease',
+      }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <span className="tag r">Post-Session</span>
+          <h2 className="r" style={{ fontSize: 'clamp(36px, 5vw, 64px)', fontWeight: 700, letterSpacing: '-.028em', lineHeight: .98, marginBottom: 56, color: 'var(--txt)', transition: 'color .4s ease', transitionDelay: '.08s' }}>
+            After every session.
+          </h2>
+          <div className="g2r" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1, background: 'var(--div)', borderRadius: 20, overflow: 'hidden' }}>
+            {[
+              ['Session Summary', 'Clean rep count, quality rating, fatigue progression, and effort drop-off point — delivered instantly.'],
+              ['Trend Analysis', 'Compare sessions over time. See if fatigue is compounding, form is improving, or intensity is sustainable.'],
+              ['Injury Risk Signals', 'Repetitive stress patterns flagged before they accumulate. Protect athletes from compounding errors.'],
+              ['Coach Export', 'Full session data available for coaching review. Share with athletes or integrate into your programming.'],
+            ].map(([title, desc], i) => (
+              <div key={i} className="r" style={{ background: 'var(--card)', padding: '44px 40px', transition: 'background .4s ease', transitionDelay: `${.08 + i * .09}s` }}>
+                <h3 style={{ fontSize: 17, fontWeight: 600, marginBottom: 12, color: 'var(--txt)', transition: 'color .4s ease' }}>{title}</h3>
+                <p style={{ fontSize: 14, color: 'var(--sub)', lineHeight: 1.72, fontWeight: 300, transition: 'color .4s ease' }}>{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <Footer />
+    </>
+  );
+}
+
+// ─── App ──────────────────────────────────────────────────────────────────────────
+export default function App() {
+  const [theme, setTheme] = useState(() => {
+    try { return localStorage.getItem('gx-theme') || 'dark'; } catch { return 'dark'; }
+  });
+  const [page, setPage] = useState('home');
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    try { localStorage.setItem('gx-theme', theme); } catch { /* ignore storage errors */ }
+  }, [theme]);
+
+  const navigate = (pg) => {
+    setPage(pg);
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+
+  return (
+    <>
+      <style dangerouslySetInnerHTML={{ __html: CSS }} />
+      <Cursor />
+      <Nav theme={theme} toggleTheme={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} page={page} setPage={navigate} />
+      <main>
+        {page === 'home' && <>
+          <Hero />
+          <PodSection />
+          <PodSpec />
+          <Problem />
+          <LiveDash />
+          <PostWorkout />
+          <HowItWorks />
+          <AppPreview />
+          <Footer />
+        </>}
+        {page === 'platform' && <PlatformPage />}
+        {page === 'analytics' && <AnalyticsPage />}
+        {page === 'about' && <AboutPage />}
+        {page === 'contact' && <ContactPage />}
+      </main>
+    </>
+  );
+}
