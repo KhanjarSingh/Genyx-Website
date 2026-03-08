@@ -987,14 +987,6 @@ function InstagramIcon() {
     </svg>
   );
 }
-function XIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-    </svg>
-  );
-}
-
 // ─── Footer ────────────────────────────────────────────────────────────────────
 function Footer() {
   useReveal();
@@ -1066,12 +1058,7 @@ function Footer() {
           {/* Col 1 - Brand */}
           <div>
             <a href="/" onClick={goPage('/')} style={{ display: 'inline-flex', alignItems: 'center', gap: 10, marginBottom: 22 }}>
-              <img src="/genyx-logo.svg" alt="Genyx" style={{
-                width: 38, height: 38, borderRadius: '50%',
-                objectFit: 'cover',
-                border: '1px solid rgba(255,255,255,.1)',
-              }} />
-              <span style={{ color: '#fff', fontSize: 13, letterSpacing: '.15em', textTransform: 'uppercase', fontWeight: 700 }}>
+              <span style={{ color: '#fff', fontSize: 24, letterSpacing: '-.02em', fontWeight: 700, lineHeight: 1 }}>
                 Genyx
               </span>
             </a>
@@ -1083,9 +1070,8 @@ function Footer() {
             </p>
             {/* Socials */}
             <div style={{ display: 'flex', gap: 8 }}>
-              <a href="https://linkedin.com/company/genyx" target="_blank" rel="noopener noreferrer" className="ft-social" style={socialBtn}><LinkedInIcon /></a>
-              <a href="https://instagram.com/genyx" target="_blank" rel="noopener noreferrer" className="ft-social" style={socialBtn}><InstagramIcon /></a>
-              <a href="https://x.com/genyx" target="_blank" rel="noopener noreferrer" className="ft-social" style={socialBtn}><XIcon /></a>
+              <a href="https://www.linkedin.com/company/genyxhealthcare/" target="_blank" rel="noopener noreferrer" className="ft-social" style={socialBtn}><LinkedInIcon /></a>
+              <a href="https://www.instagram.com/genyxai/" target="_blank" rel="noopener noreferrer" className="ft-social" style={socialBtn}><InstagramIcon /></a>
             </div>
           </div>
 

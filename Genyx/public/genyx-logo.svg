@@ -1,13 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" role="img" aria-label="genyx logo">
-  <defs>
-    <clipPath id="clip-circle">
-      <circle cx="320" cy="320" r="300" />
-    </clipPath>
-  </defs>
-  <g clip-path="url(#clip-circle)">
-    <rect width="640" height="640" fill="#000000" />
-    <g transform="translate(320 330) scale(1.24) translate(-320 -330)">
-      <text x="320" y="360" text-anchor="middle" font-family="DM Sans, Arial, Helvetica, sans-serif" font-size="150" font-weight="500" letter-spacing="-2" fill="#ffffff">genyx</text>
-    </g>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 96" role="img" aria-label="Genyx logo">
+  <text
+    x="0"
+    y="68"
+    font-family="DM Sans, Arial, Helvetica, sans-serif"
+    font-size="62"
+    font-weight="600"
+    letter-spacing="-2"
+    fill="#ffffff"
+  >
+    Genyx
+  </text>
 </svg>

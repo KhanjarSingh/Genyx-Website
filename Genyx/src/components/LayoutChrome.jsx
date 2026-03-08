@@ -66,19 +66,16 @@ export function Nav({ theme, toggleTheme, page, setPage }) {
         transition: 'background .35s ease, border-color .35s ease',
       }}>
         <button onClick={() => go('home')} style={{ display: 'flex', alignItems: 'center', gap: 9, zIndex: 101, background: 'none', border: 'none', padding: 0, justifySelf: 'start' }}>
-          <img
-            src="/genyx-logo.svg"
-            alt="Genyx"
-            style={{
-              width: 42,
-              height: 42,
-              borderRadius: '50%',
-              objectFit: 'cover',
-              objectPosition: 'center',
-              border: '1px solid rgba(255,255,255,.1)',
-              display: 'block',
-            }}
-          />
+          <span style={{
+            color: 'var(--txt)',
+            fontSize: 24,
+            fontWeight: 700,
+            letterSpacing: '-.02em',
+            lineHeight: 1,
+            transition: 'color .4s ease',
+          }}>
+            Genyx
+          </span>
         </button>
 
         <div className="nm" style={{ display: 'flex', gap: 36 }}>
