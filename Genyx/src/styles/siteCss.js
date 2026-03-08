@@ -382,57 +382,6 @@ a, button { cursor: none; text-decoration: none; }
 .contact-linklist { display: grid; gap: 6px; }
 .contact-info-card .nl { display: block; margin-top: 0; font-size: 12px; }
 
-/* ── ROI Page ── */
-.roi-wrap { width: 100%; }
-.roi-grid { display: grid; grid-template-columns: 1.12fr .88fr; gap: 14px; align-items: start; }
-.roi-card {
-  background: var(--card);
-  border: 1px solid var(--bd);
-  border-radius: 16px;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  transition: background .4s ease, border-color .4s ease;
-}
-.roi-kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.roi-kpi {
-  background: var(--bg3);
-  border: 1px solid var(--bd);
-  border-radius: 12px;
-  padding: 14px 12px;
-  transition: background .4s ease, border-color .4s ease;
-}
-.roi-kpi-l {
-  color: var(--sub);
-  font-size: 10px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
-.roi-kpi-v {
-  color: var(--a);
-  font-size: clamp(24px, 3vw, 34px);
-  font-weight: 700;
-  letter-spacing: -.02em;
-  line-height: 1;
-}
-.roi-split { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.roi-mini-l {
-  color: var(--sub);
-  font-size: 10px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
-.roi-mini-v {
-  color: var(--txt);
-  font-size: clamp(22px, 2.5vw, 30px);
-  font-weight: 600;
-  letter-spacing: -.02em;
-}
-.roi-list { color: var(--sub); font-size: 12px; line-height: 1.7; display: grid; gap: 4px; margin-bottom: 8px; }
-
 /* ─── Responsive ─────────────────────────────────────────────────── */
 @media (max-width:1024px) {
   .g2 { grid-template-columns:1fr!important; }
@@ -442,7 +391,6 @@ a, button { cursor: none; text-decoration: none; }
   .pw-sp { grid-template-columns:1fr!important; }
   .prob-g { grid-template-columns:1fr!important; }
   .pod-cols { grid-template-columns:1fr!important; text-align:center!important; }
-  .roi-grid { grid-template-columns: 1fr!important; }
   .team-core-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width:840px) {
@@ -465,8 +413,6 @@ a, button { cursor: none; text-decoration: none; }
   .contact-chip-grid { justify-self: start!important; width: 100%!important; grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .contact-form-grid { grid-template-columns: 1fr!important; }
   .contact-info { display: none!important; }
-  .roi-kpi-grid { grid-template-columns: 1fr!important; }
-  .roi-split { grid-template-columns: 1fr!important; }
   .footer-bottom-grid {
     grid-template-columns: 1fr!important;
     justify-items: center!important;

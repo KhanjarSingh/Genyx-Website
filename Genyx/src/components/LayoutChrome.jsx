@@ -48,7 +48,6 @@ export function Nav({ theme, toggleTheme, page, setPage }) {
     { label: 'Home', pg: 'home' },
     { label: 'Platform', pg: 'platform' },
     { label: 'Analytics', pg: 'analytics' },
-    { label: 'ROI', pg: 'roi' },
     { label: 'About', pg: 'about' },
     { label: 'Contact', pg: 'contact' },
   ];

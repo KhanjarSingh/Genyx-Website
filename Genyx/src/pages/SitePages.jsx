@@ -213,7 +213,7 @@ function Hero() {
           </button>
         </div>
 
-        {/* 3D Arducam hero object */}
+        {/* 3D Genyx Hardware hero object */}
         <div className="hw" style={{ marginTop: 64, display: 'flex', justifyContent: 'center', animationDelay: '1.18s' }}>
           <div className="hero-cam-wrap">
             <ArduCamModule3 />
@@ -259,7 +259,7 @@ function PodSection() {
         }}>
           <img
             src={podImg}
-            alt="Genyx Pod deployed in a premium gym - AI camera on floor stand near dumbbell rack"
+            alt="Genyx Pod deployed in a premium gym - Genyx Hardware on floor stand near dumbbell rack"
             style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 55%', display: 'block' }}
           />
           {/* Subtle dark vignette overlay */}
@@ -339,7 +339,7 @@ function PodSpec() {
               maxWidth: 360, lineHeight: 1.72, fontWeight: 300,
               paddingBottom: 6, transition: 'color .4s ease',
             }}>
-              Weighted aluminum base. 1080p AI camera. Ball-head articulation. Height-adjustable 0.9m–1.6m. Built for serious training environments.
+              Weighted aluminum base. Genyx Hardware. Ball-head articulation. Height-adjustable 0.9m–1.6m. Built for serious training environments.
             </p>
           </div>
         </div>
@@ -351,7 +351,7 @@ function PodSpec() {
         }}>
           <img
             src={podSpec}
-            alt="Genyx Pod technical specifications - floor stand with arducam 1080p camera, ball head, height adjustment"
+            alt="Genyx Pod technical specifications - floor stand with Genyx Hardware, ball head, height adjustment"
             style={{ width: '100%', display: 'block', objectFit: 'cover' }}
           />
           {/* Subtle border overlay */}
@@ -371,7 +371,7 @@ function PodSpec() {
           overflow: 'hidden', transitionDelay: '.24s',
         }}>
           {[
-            ['Arducam 1080P', 'Custom matte grey housing'],
+            ['Genyx Hardware', 'Custom matte grey housing'],
             ['H: 0.9m – 1.6m', 'Seamless height lock'],
             ['±90° Pan Rotation', 'Precision ball head'],
             ['Weighted Aluminum', 'Brushed base, internal cable'],
@@ -676,7 +676,7 @@ function HowItWorks() {
           }}>Three steps.<br />Zero friction.</h2>
         </div>
         {[
-          ['Camera pod captures movement', 'Fixed overhead or side angle. No setup. No per-user calibration. Plug in, point, run.'],
+          ['Genyx Hardware captures movement', 'Fixed overhead or side angle. No setup. No per-user calibration. Plug in, point, run.'],
           ['AI extracts rep-level signals in real time', 'Joint angles, velocity curves, timing - rep by rep - as the set unfolds. Frame-level accuracy.'],
           ['Intelligence delivered instantly', 'Live signals to the display in under 200ms. Full post-session analytics within seconds.'],
         ].map(([title, desc], i) => (
@@ -1020,7 +1020,6 @@ function Footer() {
             {[
               ['Platform', '/platform'],
               ['Analytics', '/analytics'],
-              ['ROI', '/roi'],
               ['Contact', '/contact'],
             ].map(([label, path]) => (
               <a key={label} href={path} onClick={goPage(path)} className="nl" style={{ fontSize: 12 }}>{label}</a>
@@ -1116,12 +1115,12 @@ export function AboutPage() {
           </h2>
           <div className="r" style={{ transitionDelay: '.16s', marginBottom: 80 }}>
             <p style={{ fontSize: 'clamp(16px, 1.8vw, 20px)', color: 'var(--sub)', lineHeight: 1.72, maxWidth: 720, fontWeight: 300, transition: 'color .4s ease' }}>
-              The Genyx Pod uses an Arducam 1080P camera module inside a custom-built, precision-machined housing. Mounted on a weighted aluminum floor stand with ball-head articulation and height adjustment from 0.9m to 1.6m, it deploys in minutes - in any facility, for any athlete. The AI processes every frame locally and delivers coaching signals in under 200 milliseconds.
+              The Genyx Pod uses Genyx Hardware inside a custom-built, precision-machined housing. Mounted on a weighted aluminum floor stand with ball-head articulation and height adjustment from 0.9m to 1.6m, it deploys in minutes - in any facility, for any athlete. The AI processes every frame locally and delivers coaching signals in under 200 milliseconds.
             </p>
           </div>
           <div className="g2r" style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 1, background: 'var(--div)', borderRadius: 20, overflow: 'hidden' }}>
             {[
-              ['Arducam 1080P', 'Custom grey housing', 'The vision module at the heart of the Pod. High frame rate, low latency, optimized for movement capture in gym lighting conditions.'],
+              ['Genyx Hardware', 'Custom grey housing', 'The hardware core at the heart of the Pod. High frame rate, low latency, optimized for movement capture in gym lighting conditions.'],
               ['Computer Vision AI', 'Frame-level accuracy', 'Joint angle extraction, velocity measurement, range-of-motion tracking - all without body-worn sensors. Processed rep by rep.'],
               ['< 200ms Latency', 'Live coaching feedback', 'Signals are processed and delivered to the coaching display before a rep completes. Feedback that changes behavior in real time.'],
               ['Zero Calibration', 'Any athlete, instantly', 'No setup per user. No body measurements entered. A new athlete walks in - the system reads their movement from frame one.'],
@@ -1186,7 +1185,7 @@ export function AboutPage() {
         paddingLeft: 80, paddingRight: 80, transition: 'background .4s ease',
       }}>
         <div className="g4r" style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 1, background: 'var(--div)', borderRadius: 20, overflow: 'hidden' }}>
-          {[['< 200ms', 'Live coaching latency'], ['1080P', 'Arducam vision module'], ['0', 'Wearables required'], ['73%', 'Reps that go unvalidated today']].map(([stat, label]) => (
+          {[['< 200ms', 'Live coaching latency'], ['1080P', 'Genyx Hardware'], ['0', 'Wearables required'], ['73%', 'Reps that go unvalidated today']].map(([stat, label]) => (
             <div key={stat} className="r" style={{ background: 'var(--card)', padding: '52px 32px', textAlign: 'center', transition: 'background .4s ease' }}>
               <div style={{ fontSize: 'clamp(30px, 4vw, 48px)', fontWeight: 700, color: 'var(--a)', letterSpacing: '-.02em', marginBottom: 10, transition: 'color .4s ease' }}>{stat}</div>
               <div style={{ fontSize: 12, color: 'var(--sub)', letterSpacing: '.06em', lineHeight: 1.5, transition: 'color .4s ease' }}>{label}</div>
@@ -1660,7 +1659,7 @@ export function ContactPage() {
                       <div>
                         <label className={`contact-lbl${errors.investorInterest ? ' is-err' : ''}`}>What interests you most about Genyx?</label>
                         <div className={`contact-radiogrp${errors.investorInterest ? ' is-err' : ''}`}>
-                          {['Camera-only AI differentiation', 'Market size', 'Enterprise scalability', 'Team & execution', 'Post-workout analytics IP'].map((opt) => (
+                          {['Genyx Hardware AI differentiation', 'Market size', 'Enterprise scalability', 'Team & execution', 'Post-workout analytics IP'].map((opt) => (
                             <button key={opt} type="button" className="contact-opt" onClick={() => setRadio('investorInterest', opt)} data-h>
                               <span className={`contact-dot${form.investorInterest === opt ? ' is-on' : ''}`} /><span>{opt}</span>
                             </button>
@@ -1837,7 +1836,7 @@ export function PlatformPage() {
             maxWidth: 500, marginTop: 40, fontWeight: 300, transition: 'color .4s ease',
             transitionDelay: '.18s',
           }}>
-            Genyx turns a fixed camera into a full-stack coaching system. No wearables. No manual logging. No friction.
+            Genyx turns Genyx Hardware into a full-stack coaching system. No wearables. No manual logging. No friction.
           </p>
           {/* Stat row */}
           <div className="r" style={{ marginTop: 64, display: 'flex', gap: 56, flexWrap: 'wrap', transitionDelay: '.28s' }}>
@@ -1865,7 +1864,7 @@ export function PlatformPage() {
           }}>Capture. Analyze.<br />Deliver.</h2>
 
           {[
-            ['Capture', 'The Genyx Pod mounts in your facility - floor stand or fixed. Point it at the platform. No per-athlete setup. No wearables. The 1080P Arducam vision module starts reading movement the moment training begins.'],
+            ['Capture', 'The Genyx Pod mounts in your facility - floor stand or fixed. Point it at the platform. No per-athlete setup. No wearables. Genyx Hardware starts reading movement the moment training begins.'],
             ['Analyze', 'Computer vision AI processes every frame in real time. Joint angles, velocity curves, rep timing, range of motion - extracted rep by rep. The system understands the difference between a clean lift and a compromised one.'],
             ['Deliver', 'Signals reach your display in under 200ms. Coaches see quality scores, fatigue state, and rep-level data live - while the set is happening. Full analytics hit the dashboard the moment the session ends.'],
           ].map(([title, desc], i) => (
@@ -1913,7 +1912,7 @@ export function PlatformPage() {
             </div>
           </div>
           <div className="pod-strip r" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, background: 'var(--div)', borderRadius: '0 0 20px 20px', overflow: 'hidden', marginBottom: 140, transitionDelay: '.25s' }}>
-            {[['Computer Vision AI', 'Arducam 1080P module'], ['< 200ms Latency', 'Frame-level processing'], ['Zero Wearables', 'No athlete setup required'], ['Multi-Location', 'One dashboard, every pod']].map(([title, sub]) => (
+            {[['Computer Vision AI', 'Genyx Hardware'], ['< 200ms Latency', 'Frame-level processing'], ['Zero Wearables', 'No athlete setup required'], ['Multi-Location', 'One dashboard, every pod']].map(([title, sub]) => (
               <div key={title} style={{ background: 'var(--bg3)', padding: '28px 24px', transition: 'background .4s ease' }}>
                 <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--txt)', marginBottom: 5, transition: 'color .4s ease' }}>{title}</div>
                 <div style={{ fontSize: 12, color: 'var(--sub)', transition: 'color .4s ease' }}>{sub}</div>
@@ -2105,173 +2104,6 @@ export function AnalyticsPage() {
     </>
   );
 }
-
-// ─── ROI Page ─────────────────────────────────────────────────────────────────────
-export function ROIPage() {
-  useReveal();
-  const [inputs, setInputs] = useState({
-    locations: 3,
-    membersPerLocation: 220,
-    arpu: 2500,
-    retentionLift: 2.8,
-    coachHoursSavedPerWeek: 12,
-    coachHourlyCost: 800,
-    platformCostPerLocation: 65000,
-  });
-
-  const totalMembers = inputs.locations * inputs.membersPerLocation;
-  const monthlyLaborValue = inputs.locations * inputs.coachHoursSavedPerWeek * 4.33 * inputs.coachHourlyCost;
-  const monthlyRetentionValue = totalMembers * inputs.arpu * (inputs.retentionLift / 100);
-  const monthlyValue = monthlyLaborValue + monthlyRetentionValue;
-  const monthlyCost = inputs.locations * inputs.platformCostPerLocation;
-  const monthlyNet = monthlyValue - monthlyCost;
-  const annualNet = monthlyNet * 12;
-  const annualCost = monthlyCost * 12;
-  const roiPct = annualCost > 0 ? (annualNet / annualCost) * 100 : 0;
-  const paybackMonths = monthlyValue > 0 ? monthlyCost / monthlyValue : null;
-
-  const money = (n) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n);
-  const num = (n) => new Intl.NumberFormat('en-IN').format(Math.round(n));
-  const goPage = (path) => (e) => {
-    e.preventDefault();
-    if (window.location.pathname !== path) {
-      window.history.pushState({}, '', path);
-      window.dispatchEvent(new PopStateEvent('popstate'));
-    }
-    window.scrollTo({ top: 0, behavior: 'instant' });
-  };
-
-  const setVal = (k) => (e) => setInputs((prev) => ({ ...prev, [k]: Number(e.target.value) }));
-
-  return (
-    <>
-      <section className="sp" style={{
-        minHeight: '82vh', display: 'flex', alignItems: 'center',
-        background: 'var(--bg)', paddingTop: 140, paddingBottom: 110,
-        paddingLeft: 80, paddingRight: 80, transition: 'background .4s ease',
-      }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
-          <span className="tag r">ROI</span>
-          <h1 className="r" style={{
-            fontSize: 'clamp(56px, 10vw, 118px)', fontWeight: 700,
-            lineHeight: .95, letterSpacing: '-.034em',
-            color: 'var(--txt)', transition: 'color .4s ease', transitionDelay: '.08s',
-          }}>
-            Prove impact.<br />
-            <span style={{ color: 'var(--a)' }}>Before rollout.</span>
-          </h1>
-          <p className="r" style={{
-            fontSize: 'clamp(16px, 1.8vw, 20px)', color: 'var(--sub)', lineHeight: 1.72,
-            maxWidth: 560, marginTop: 36, fontWeight: 300, transition: 'color .4s ease',
-            transitionDelay: '.16s',
-          }}>
-            A B2B ROI calculator for gyms, coaching teams, and multi-location operators evaluating Genyx deployment.
-          </p>
-        </div>
-      </section>
-
-      <section className="sp" style={{
-        background: 'var(--bg2)', paddingTop: 90, paddingBottom: 120,
-        paddingLeft: 80, paddingRight: 80, transition: 'background .4s ease',
-      }}>
-        <div className="roi-wrap" style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <div className="roi-grid">
-            <div className="roi-card r">
-              <div className="contact-sec-lbl">Business Inputs</div>
-              <div className="div" />
-
-              <label className="contact-lbl">Facilities</label>
-              <div className="contact-range-val">{num(inputs.locations)} locations</div>
-              <input className="contact-range" type="range" min="1" max="60" step="1" value={inputs.locations} onChange={setVal('locations')} data-h />
-
-              <label className="contact-lbl" style={{ marginTop: 8 }}>Members per location</label>
-              <div className="contact-range-val">{num(inputs.membersPerLocation)} members</div>
-              <input className="contact-range" type="range" min="1" max="2000" step="1" value={inputs.membersPerLocation} onChange={setVal('membersPerLocation')} data-h />
-
-              <div className="contact-grid-2">
-                <div>
-                  <label className="contact-lbl">ARPU / month (INR)</label>
-                  <input className="fi" type="number" min="100" max="100000" value={inputs.arpu} onChange={setVal('arpu')} data-h />
-                </div>
-                <div>
-                  <label className="contact-lbl">Retention lift %</label>
-                  <input className="fi" type="number" min="0" max="20" step="0.1" value={inputs.retentionLift} onChange={setVal('retentionLift')} data-h />
-                </div>
-              </div>
-
-              <div className="contact-sec-lbl">Operational Inputs</div>
-              <div className="div" />
-
-              <div className="contact-grid-2">
-                <div>
-                  <label className="contact-lbl">Coach hours saved / week</label>
-                  <input className="fi" type="number" min="0" max="120" value={inputs.coachHoursSavedPerWeek} onChange={setVal('coachHoursSavedPerWeek')} data-h />
-                </div>
-                <div>
-                  <label className="contact-lbl">Coach hourly cost (INR)</label>
-                  <input className="fi" type="number" min="100" max="10000" value={inputs.coachHourlyCost} onChange={setVal('coachHourlyCost')} data-h />
-                </div>
-              </div>
-
-              <label className="contact-lbl">Genyx cost / location / month (INR)</label>
-              <input className="fi" type="number" min="1000" max="500000" value={inputs.platformCostPerLocation} onChange={setVal('platformCostPerLocation')} data-h />
-            </div>
-
-            <aside className="roi-card r" style={{ transitionDelay: '.08s' }}>
-              <div className="contact-sec-lbl">Projected Outcome</div>
-              <div className="div" />
-
-              <div className="roi-kpi-grid">
-                <div className="roi-kpi">
-                  <div className="roi-kpi-l">Monthly Value</div>
-                  <div className="roi-kpi-v">{money(monthlyValue)}</div>
-                </div>
-                <div className="roi-kpi">
-                  <div className="roi-kpi-l">Monthly Platform Cost</div>
-                  <div className="roi-kpi-v">{money(monthlyCost)}</div>
-                </div>
-                <div className="roi-kpi">
-                  <div className="roi-kpi-l">Net Monthly Impact</div>
-                  <div className="roi-kpi-v">{money(monthlyNet)}</div>
-                </div>
-                <div className="roi-kpi">
-                  <div className="roi-kpi-l">Annual Net Impact</div>
-                  <div className="roi-kpi-v">{money(annualNet)}</div>
-                </div>
-              </div>
-
-              <div className="div" />
-              <div className="roi-split">
-                <div>
-                  <div className="roi-mini-l">Annual ROI</div>
-                  <div className="roi-mini-v">{roiPct.toFixed(1)}%</div>
-                </div>
-                <div>
-                  <div className="roi-mini-l">Payback</div>
-                  <div className="roi-mini-v">{paybackMonths ? `${paybackMonths.toFixed(1)} months` : 'N/A'}</div>
-                </div>
-              </div>
-
-              <div className="div" />
-              <div className="roi-list">
-                <div>• Labor value/month: {money(monthlyLaborValue)}</div>
-                <div>• Retention value/month: {money(monthlyRetentionValue)}</div>
-                <div>• Athletes covered: {num(totalMembers)}</div>
-              </div>
-
-              <a href="/contact" onClick={goPage('/contact')} className="cp contact-submit" data-h style={{ display: 'inline-block', textAlign: 'center', textDecoration: 'none' }}>
-                <span>Discuss ROI Assumptions →</span>
-              </a>
-            </aside>
-          </div>
-        </div>
-      </section>
-
-      <Footer />
-    </>
-  );
-}
-
 
 export function HomePage() {
   return (
