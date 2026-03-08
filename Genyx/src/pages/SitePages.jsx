@@ -4,8 +4,9 @@ import ArduCamModule3 from '../components/ArduCamModule3';
 import podImg from '../assets/pod1.jpeg';
 import podSpec from '../assets/pod2.jpeg';
 import mobileHandImg from '../assets/Mobile.jpeg';
-import kushSirImg from '../assets/Kush Sir.jpeg';
-import vanshTripathiImg from '../assets/Vansh Tripathi.jpeg';
+import kushKadhyanImg from '../assets/Kush_khadyan-.png';
+import siddarthaImg from '../assets/Siddhart_-.png';
+import shashankMitalImg from '../assets/shashank_mital.png';
 
 const DEMO_VIDEO = 'https://cdn.speedsize.com/3f711f28-1488-44dc-b013-5e43284ac4b0/https://public-web-assets.uh-static.com/web_v2/homepage-v3/app-section/display-videos/ring-new.mp4';
 
@@ -675,7 +676,7 @@ function HowItWorks() {
           }}>Three steps.<br />Zero friction.</h2>
         </div>
         {[
-          ['Camera pod captures movement', 'Fixed overhead or side-angle. No setup. No per-user calibration. Plug in, point, run.'],
+          ['Camera pod captures movement', 'Fixed overhead or side angle. No setup. No per-user calibration. Plug in, point, run.'],
           ['AI extracts rep-level signals in real time', 'Joint angles, velocity curves, timing - rep by rep - as the set unfolds. Frame-level accuracy.'],
           ['Intelligence delivered instantly', 'Live signals to the display in under 200ms. Full post-session analytics within seconds.'],
         ].map(([title, desc], i) => (
@@ -852,20 +853,32 @@ function TeamSection() {
   const team = [
     {
       name: 'Kush Kadhyan',
-      title: 'Founder & CEO',
-      bio: 'Leads Genyx vision, product direction, and company execution.',
-      img: kushSirImg,
+      title: 'Founder',
+      bio: 'Technical experience in quantitative finance, systems thinking, and operational leadership to building scalable computer vision products. Previously built and exited a data-driven venture and led investment and growth initiatives across technology and capital-intensive environments.',
+      img: kushKadhyanImg,
+      imgScale: 1.07,
+      imgShiftY: '6px',
     },
     {
-      name: 'Vansh Tripathi',
-      title: 'Co-Tech Lead & Operations Manager (Intern)',
-      bio: 'Supports technology delivery and operational execution across Genyx.',
-      img: vanshTripathiImg,
+      name: 'Siddartha Agrawal',
+      title: 'Core Tech Systems and Investor',
+      bio: 'Entrepreneur | Quantitative Investments | High Frequency Trading | Co-Founder of Watsol Labs',
+      img: siddarthaImg,
+      imgScale: 1.16,
+      imgShiftY: '20px',
     },
     {
-      name: 'Ashish Upadhyay',
-      title: '',
-      bio: '',
+      name: 'Shashank Mital',
+      title: 'Business & Marketing Advisor',
+      bio: 'Principal Partner at India Accelerator and global marketing leader with 30+ years of experience, closely guiding Genyx on growth strategy, partnerships, and investor relations.',
+      img: shashankMitalImg,
+      imgScale: 1.07,
+      imgShiftY: '8px',
+    },
+    {
+      name: 'Aarav Mehta',
+      title: 'Product and GTM Associate (Interim)',
+      bio: 'Temporary profile: supporting product operations, customer discovery, and rollout workflows while the core team expands.',
       img: '',
     },
   ];
@@ -882,17 +895,30 @@ function TeamSection() {
             letterSpacing: '-.028em', lineHeight: .98,
             color: 'var(--txt)', transition: 'color .4s ease', transitionDelay: '.08s',
           }}>
-            Built by people who coach.
+            Our Core Team
           </h2>
         </div>
 
-        <div className="g3r" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16 }}>
+        <div className="team-core-grid" style={{ display: 'grid', gap: 16 }}>
           {team.map((m, i) => (
             <article key={m.name} className="team-card r" style={{ transitionDelay: `${.12 + i * .08}s` }}>
               {m.img ? (
-                <img src={m.img} alt={m.name} className="team-img" loading="lazy" />
+                <div className="team-img-wrap">
+                  <img
+                    src={m.img}
+                    alt={m.name}
+                    className="team-img-person"
+                    loading="lazy"
+                    style={{ transform: `translateY(${m.imgShiftY || '0'}) scale(${m.imgScale || 1})` }}
+                  />
+                </div>
               ) : (
-                <div className="team-img" style={{ background: 'linear-gradient(135deg, var(--bg3), var(--bg2))' }} />
+                <div className="team-img-wrap team-img-temp" aria-label="Temporary profile icon">
+                  <svg width="72" height="72" viewBox="0 0 24 24" fill="none" style={{ color: 'var(--a)' }}>
+                    <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.5" />
+                    <path d="M4 20C4.7 16.7 7.4 14.5 12 14.5C16.6 14.5 19.3 16.7 20 20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                  </svg>
+                </div>
               )}
               <div style={{ padding: 20 }}>
                 <h3 style={{ fontSize: 18, fontWeight: 600, color: 'var(--txt)', marginBottom: 6, transition: 'color .4s ease' }}>{m.name}</h3>

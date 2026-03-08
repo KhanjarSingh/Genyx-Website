@@ -224,7 +224,29 @@ a, button { cursor: none; text-decoration: none; }
   transition: border-color .3s ease, transform .3s ease, background .4s ease;
 }
 .team-card:hover { border-color: rgba(77,255,239,.2); transform: translateY(-4px); }
-.team-img { width: 100%; aspect-ratio: 4/5; object-fit: cover; display: block; filter: grayscale(.14) contrast(1.05); }
+.team-core-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.team-img-wrap {
+  width: 100%;
+  aspect-ratio: 4/5;
+  display: grid;
+  place-items: end center;
+  background: linear-gradient(160deg, var(--bg3), var(--bg2));
+  border-bottom: 1px solid var(--bd);
+  padding: 18px 14px 0;
+  overflow: hidden;
+}
+.team-img-person {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  display: block;
+  transform-origin: center bottom;
+}
+.team-img-temp {
+  place-items: center;
+  padding: 0;
+}
 
 /* ── Contact Page ── */
 .contact-wrap { width: 100%; }
@@ -421,6 +443,7 @@ a, button { cursor: none; text-decoration: none; }
   .prob-g { grid-template-columns:1fr!important; }
   .pod-cols { grid-template-columns:1fr!important; text-align:center!important; }
   .roi-grid { grid-template-columns: 1fr!important; }
+  .team-core-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width:840px) {
   .nm  { display:none!important; }
@@ -477,6 +500,7 @@ a, button { cursor: none; text-decoration: none; }
   .contact-role-grid { grid-template-columns:1fr 1fr!important; }
   .contact-role-btn { padding:18px!important; }
   .contact-form-card { padding:20px!important; }
+  .team-core-grid { grid-template-columns: 1fr!important; }
 }
 
 /* ── Form input ── */

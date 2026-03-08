@@ -42,14 +42,27 @@ function WebcamMesh() {
   const groupRef = useRef(null);
   const bodyGeo = useBodyGeometry();
 
-  useFrame(({ pointer }) => {
+  useFrame((state, delta) => {
     if (!groupRef.current) return;
-    groupRef.current.rotation.x += (pointer.y * 0.25 - groupRef.current.rotation.x) * 0.07;
-    groupRef.current.rotation.y += (pointer.x * 0.45 - groupRef.current.rotation.y) * 0.07;
+    const t = state.clock.getElapsedTime();
+    const { pointer } = state;
+
+    // Pointer-follow with cinematic idle drift for premium hero motion.
+    const targetRotX = pointer.y * 0.18 + Math.sin(t * 0.68) * 0.03;
+    const targetRotY = pointer.x * 0.34 + Math.sin(t * 0.46) * 0.055;
+    const targetRotZ = Math.sin(t * 0.35) * 0.015;
+    const targetPosY = Math.sin(t * 0.9) * 0.03;
+    const targetPosX = pointer.x * 0.03 + Math.sin(t * 0.52) * 0.015;
+
+    groupRef.current.rotation.x = THREE.MathUtils.damp(groupRef.current.rotation.x, targetRotX, 4.6, delta);
+    groupRef.current.rotation.y = THREE.MathUtils.damp(groupRef.current.rotation.y, targetRotY, 4.8, delta);
+    groupRef.current.rotation.z = THREE.MathUtils.damp(groupRef.current.rotation.z, targetRotZ, 3.2, delta);
+    groupRef.current.position.y = THREE.MathUtils.damp(groupRef.current.position.y, targetPosY, 3.8, delta);
+    groupRef.current.position.x = THREE.MathUtils.damp(groupRef.current.position.x, targetPosX, 3.8, delta);
   });
 
   return (
-    <Float speed={1.2} floatIntensity={0.28} rotationIntensity={0.18}>
+    <Float speed={0.95} floatIntensity={0.12} rotationIntensity={0.08}>
       <group ref={groupRef}>
         <mesh geometry={bodyGeo} castShadow receiveShadow>
           <meshStandardMaterial color={BODY_COLOR} roughness={0.88} metalness={0.05} />
