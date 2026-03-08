@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useReveal } from '../hooks/useReveal';
 import ArduCamModule3 from '../components/ArduCamModule3';
-import podImg from '../assets/pod1.jpeg';
 import podSpec from '../assets/pod2.jpeg';
 import mobileHandImg from '../assets/Mobile.jpeg';
-import kushKadhyanImg from '../assets/Kush_khadyan-.png';
-import siddarthaImg from '../assets/Siddhart_-.png';
+import kushKadhyanImg from '../assets/kush Sir.jpeg';
+import siddarthaImg from '../assets/lastest_siddhart.jpeg';
 import shashankMitalImg from '../assets/shashank_mital.png';
+import podAestheticImg from '../assets/pod asthetic pic.jpeg';
 
 const DEMO_VIDEO = 'https://cdn.speedsize.com/3f711f28-1488-44dc-b013-5e43284ac4b0/https://public-web-assets.uh-static.com/web_v2/homepage-v3/app-section/display-videos/ring-new.mp4';
 
@@ -105,6 +105,18 @@ function PodSVG({ size = 300 }) {
   );
 }
 
+// ─── Shared navigation helper ────────────────────────────────────────────────────
+function goPage(path) {
+  return (e) => {
+    e.preventDefault();
+    if (window.location.pathname !== path) {
+      window.history.pushState({}, '', path);
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    }
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+}
+
 // ─── Hero ─────────────────────────────────────────────────────────────────────────
 function Hero() {
   const cvs = useRef(null);
@@ -195,7 +207,7 @@ function Hero() {
 
         {/* CTAs */}
         <div className="hw" style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', animationDelay: '1.02s' }}>
-          <button className="cp" style={{
+          <button className="cp" onClick={goPage('/contact')} style={{
             background: 'transparent', border: '1px solid var(--bd)',
             borderRadius: 100, padding: '14px 36px',
             color: 'var(--txt)', fontSize: 13, fontWeight: 500, letterSpacing: '.06em',
@@ -203,7 +215,7 @@ function Hero() {
           }}>
             <span>Request Access</span>
           </button>
-          <button style={{
+          <button className="cp" onClick={goPage('/platform')} style={{
             background: 'var(--at)', border: '1px solid var(--a)',
             borderRadius: 100, padding: '14px 36px',
             color: 'var(--a)', fontSize: 13, fontWeight: 500, letterSpacing: '.06em',
@@ -255,12 +267,13 @@ function PodSection() {
         {/* Hero photo - the real Genyx Pod in a premium gym */}
         <div className="r" style={{
           position: 'relative', borderRadius: '20px 20px 0 0', overflow: 'hidden',
-          aspectRatio: '16/7', transitionDelay: '.15s',
+          aspectRatio: '16/9', transitionDelay: '.15s',
+          background: '#0a0a0a',
         }}>
           <img
-            src={podImg}
+            src={podAestheticImg}
             alt="Genyx Pod deployed in a premium gym - Genyx Hardware on floor stand near dumbbell rack"
-            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 55%', display: 'block' }}
+            style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center', display: 'block' }}
           />
           {/* Subtle dark vignette overlay */}
           <div style={{
@@ -758,7 +771,7 @@ function AppPreview() {
         textAlign: 'center', paddingTop: 52, paddingBottom: 120,
         paddingLeft: 48, paddingRight: 48, transitionDelay: '.2s',
       }}>
-        <button style={{
+        <button onClick={goPage('/contact')} style={{
           background: 'transparent',
           border: '1px solid rgba(77,255,239,.3)',
           borderRadius: 100, padding: '14px 40px',
@@ -781,28 +794,40 @@ function Testimonials() {
   useReveal();
   const items = [
     {
-      quote: 'Genyx catches rep breakdown before I do. It changed how we coach fatigue in-session.',
-      name: 'Aarav Singh',
-      role: 'Strength Coach, Apex Performance',
+      quote: 'We used to film sets and review them post-session. With Genyx, I get joint angle data and fatigue flags live, mid-set. It completely changed how I programme deloads.',
+      name: 'Rohit Sharma',
+      role: 'Head S&C Coach, Bengaluru Sports Academy',
+      img: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=160&q=80',
+    },
+    {
+      quote: 'My athletes stopped questioning my feedback once they could see the rep quality score themselves. Genyx made coaching conversations data-driven, not opinion-driven.',
+      name: 'Priya Nair',
+      role: 'Sports Scientist, ProFit Performance Lab, Mumbai',
+      img: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=160&q=80',
+    },
+    {
+      quote: 'No sensors on the body, no calibration per athlete - that was the deal-breaker for us. We onboard 40+ new members a month. Genyx just works from day one.',
+      name: 'Arjun Mehta',
+      role: 'Founder & Head Coach, Iron Tribe Fitness, Delhi',
+      img: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=160&q=80',
+    },
+    {
+      quote: 'I trialled every wearable on the market for two years. Nothing stuck with my athletes. Genyx removed the friction entirely - they just train and I get everything I need.',
+      name: 'James Whitfield',
+      role: 'Performance Director, Elevate Athletic, London',
       img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=160&q=80',
     },
     {
-      quote: 'The clean-rep signal made athlete feedback objective. No more guessing on quality.',
-      name: 'Maya Patel',
-      role: 'Head of Sports Science, Iron Lab',
-      img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=160&q=80',
+      quote: 'The velocity curve data per rep is something I previously only got in a university lab. Now I have it on a floor stand in my facility. That shift is massive for Indian sport.',
+      name: 'Kavitha Rajan',
+      role: 'Lead Physiotherapist, Chennai Athletic Rehab Centre',
+      img: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=160&q=80',
     },
     {
-      quote: 'Zero wearables means zero friction. Athletes just train and we still get real data.',
-      name: 'Noah Kim',
-      role: 'Performance Director, Elevate Gym',
+      quote: 'We deployed across three locations in Pune and the dashboard unified everything. I coach remotely now with more confidence than I had standing on the floor before Genyx.',
+      name: 'Vikram Desai',
+      role: 'Director of Coaching, FitStaq Gyms, Pune',
       img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=160&q=80',
-    },
-    {
-      quote: 'We scaled from one pod to three facilities without changing our coaching workflow.',
-      name: 'Zara Ali',
-      role: 'Operations Lead, Forge Athletics',
-      img: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=160&q=80',
     },
   ];
   const loopItems = [...items, ...items];
@@ -856,30 +881,28 @@ function TeamSection() {
       title: 'Founder',
       bio: 'Technical experience in quantitative finance, systems thinking, and operational leadership to building scalable computer vision products. Previously built and exited a data-driven venture and led investment and growth initiatives across technology and capital-intensive environments.',
       img: kushKadhyanImg,
-      imgScale: 1.07,
-      imgShiftY: '6px',
+      linkedin: 'https://www.linkedin.com/in/kushkadhyan/',
     },
     {
       name: 'Siddartha Agrawal',
       title: 'Core Tech Systems and Investor',
-      bio: 'Entrepreneur | Quantitative Investments | High Frequency Trading | Co-Founder of Watsol Labs',
+      bio: 'Entrepreneur | Quantitative Investments | High Frequency Trading | Co-Founder of Wallsoft Labs',
       img: siddarthaImg,
-      imgScale: 1.16,
-      imgShiftY: '20px',
+      linkedin: 'https://www.linkedin.com/in/siddhartha-agrawal-1883098/',
     },
     {
       name: 'Shashank Mital',
       title: 'Business & Marketing Advisor',
       bio: 'Principal Partner at India Accelerator and global marketing leader with 30+ years of experience, closely guiding Genyx on growth strategy, partnerships, and investor relations.',
       img: shashankMitalImg,
-      imgScale: 1.07,
-      imgShiftY: '8px',
+      linkedin: 'https://www.linkedin.com/in/shashank-m-b9b20123/',
     },
     {
       name: 'Aarav Mehta',
-      title: 'Product and GTM Associate (Interim)',
-      bio: 'Temporary profile: supporting product operations, customer discovery, and rollout workflows while the core team expands.',
+      title: 'Computer Vision Tech Lead',
+      bio: "IIT Bombay dual-degree (MSc Mech Eng + AI/DS). Published NLP & CV research (AMIA'23, SMM4H benchmark) and shipped computer-vision security at Reliance Jio. Passionate about turning state-of-the-art models into snappy mobile experiences.",
       img: '',
+      linkedin: 'https://linkedin.com/company/genyx',
     },
   ];
   return (
@@ -907,9 +930,8 @@ function TeamSection() {
                   <img
                     src={m.img}
                     alt={m.name}
-                    className="team-img-person"
+                    className={`team-img-person${m.blendDark ? ' blend-dark' : ''}`}
                     loading="lazy"
-                    style={{ transform: `translateY(${m.imgShiftY || '0'}) scale(${m.imgScale || 1})` }}
                   />
                 </div>
               ) : (
@@ -921,7 +943,20 @@ function TeamSection() {
                 </div>
               )}
               <div style={{ padding: 20 }}>
-                <h3 style={{ fontSize: 18, fontWeight: 600, color: 'var(--txt)', marginBottom: 6, transition: 'color .4s ease' }}>{m.name}</h3>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 6 }}>
+                  <h3 style={{ fontSize: 18, fontWeight: 600, color: 'var(--txt)', marginBottom: 0, transition: 'color .4s ease' }}>{m.name}</h3>
+                  {m.linkedin && (
+                    <a
+                      href={m.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="team-linkedin-btn"
+                      aria-label={`${m.name} LinkedIn`}
+                    >
+                      <LinkedInIcon />
+                    </a>
+                  )}
+                </div>
                 {m.title && (
                   <div style={{ fontSize: 11, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--a)', marginBottom: 10, transition: 'color .4s ease' }}>{m.title}</div>
                 )}
@@ -937,94 +972,205 @@ function TeamSection() {
   );
 }
 
+// ─── Social Icons ───────────────────────────────────────────────────────────────
+function LinkedInIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+    </svg>
+  );
+}
+function InstagramIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+    </svg>
+  );
+}
+function XIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+    </svg>
+  );
+}
+
 // ─── Footer ────────────────────────────────────────────────────────────────────
 function Footer() {
   useReveal();
-  const goPage = (path) => (e) => {
-    e.preventDefault();
-    if (window.location.pathname !== path) {
-      window.history.pushState({}, '', path);
-      window.dispatchEvent(new PopStateEvent('popstate'));
-    }
-    window.scrollTo({ top: 0, behavior: 'instant' });
+
+  const colHead = {
+    fontSize: 11, fontWeight: 600, letterSpacing: '.16em', textTransform: 'uppercase',
+    color: '#fff', marginBottom: 20,
+  };
+  const colLink = {
+    fontSize: 13, color: '#666', transition: 'color .3s ease',
+    display: 'block', lineHeight: 2.2,
+  };
+  const socialBtn = {
+    width: 34, height: 34, borderRadius: '50%',
+    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+    color: '#666', border: '1px solid rgba(255,255,255,.08)',
+    transition: 'color .3s ease, border-color .3s ease, background .3s ease',
   };
 
   return (
     <footer style={{
-      background: 'var(--bg)',
-      borderTop: '1px solid var(--div)',
-      transition: 'background .4s ease, border-color .4s ease',
+      background: '#060606',
       position: 'relative',
       overflow: 'hidden',
     }}>
+      {/* CTA Section */}
       <div style={{
-        position: 'absolute',
-        inset: 0,
-        pointerEvents: 'none',
-        background: 'radial-gradient(ellipse 60% 40% at 50% 0%, var(--at) 0%, transparent 72%)',
-      }} />
-
-      <div className="sp" style={{ padding: '130px 80px 96px', textAlign: 'center', maxWidth: 760, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-        <span className="tag r" style={{ display: 'block', textAlign: 'center' }}>Early Access</span>
-        <h2 className="r" style={{
-          fontSize: 'clamp(38px, 5.7vw, 68px)', fontWeight: 700,
-          letterSpacing: '-.028em', lineHeight: 1.02, marginBottom: 20,
-          color: 'var(--txt)', transition: 'color .4s ease', transitionDelay: '.1s',
-        }}>
-          Built for serious<br />
-          <span style={{ color: 'var(--a)', transition: 'color .4s ease' }}>coaching outcomes.</span>
-        </h2>
-        <p className="r" style={{ color: 'var(--sub)', fontSize: 16, lineHeight: 1.75, marginBottom: 48, transition: 'color .4s ease', transitionDelay: '.2s' }}>
-          Genyx helps teams coach with measurable movement intelligence, not assumptions.
-        </p>
-        <div className="r" style={{ transitionDelay: '.3s' }}>
-          <button className="cp" onClick={goPage('/contact')} style={{
-            background: 'transparent', border: '1px solid var(--a)',
-            borderRadius: 100, padding: '16px 52px',
-            color: 'var(--txt)', fontSize: 13, fontWeight: 500, letterSpacing: '.07em',
-            transition: 'color .4s ease, border-color .4s ease',
+        borderBottom: '1px solid rgba(255,255,255,.06)',
+        position: 'relative',
+      }}>
+        <div style={{
+          position: 'absolute', inset: 0, pointerEvents: 'none',
+          background: 'radial-gradient(ellipse 60% 50% at 50% 0%, rgba(77,255,239,.04) 0%, transparent 70%)',
+        }} />
+        <div className="sp" style={{ padding: '120px 80px 96px', textAlign: 'center', maxWidth: 720, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+          <span className="tag r" style={{ display: 'block', textAlign: 'center' }}>Early Access</span>
+          <h2 className="r" style={{
+            fontSize: 'clamp(36px, 5.5vw, 64px)', fontWeight: 700,
+            letterSpacing: '-.028em', lineHeight: 1.02, marginBottom: 18,
+            color: '#fff', transitionDelay: '.1s',
           }}>
-            <span>Request Early Access</span>
-          </button>
+            Built for serious<br />
+            <span style={{ color: '#4DFFEF' }}>coaching outcomes.</span>
+          </h2>
+          <p className="r" style={{ color: '#666', fontSize: 15, lineHeight: 1.75, marginBottom: 44, transitionDelay: '.2s' }}>
+            Genyx helps teams coach with measurable movement intelligence, not assumptions.
+          </p>
+          <div className="r" style={{ transitionDelay: '.3s' }}>
+            <button className="cp" onClick={goPage('/contact')} style={{
+              background: 'transparent', border: '1px solid #4DFFEF',
+              borderRadius: 100, padding: '15px 48px',
+              color: '#fff', fontSize: 13, fontWeight: 500, letterSpacing: '.07em',
+              transition: 'background .3s ease',
+            }}>
+              <span>Request Early Access</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="sp" style={{
-        borderTop: '1px solid var(--div)',
-        padding: '24px 80px 28px',
-        transition: 'border-color .4s ease',
-        position: 'relative',
-        zIndex: 1,
-      }}>
-        <div className="footer-bottom-grid" style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: 'auto 1fr auto', gap: 20, alignItems: 'center' }}>
-          <a href="/" onClick={goPage('/')} style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
-            <img
-              src="/genyx-logo.svg"
-              alt="Genyx"
-              style={{
-                width: 38,
-                height: 38,
-                borderRadius: '50%',
+      {/* Main Footer - 3 column */}
+      <div className="sp" style={{ padding: '56px 80px 48px', position: 'relative', zIndex: 1 }}>
+        <div className="footer-main-grid" style={{
+          maxWidth: 1100, margin: '0 auto',
+          display: 'grid', gridTemplateColumns: '1.6fr 0.8fr 1fr',
+          gap: 48,
+        }}>
+
+          {/* Col 1 - Brand */}
+          <div>
+            <a href="/" onClick={goPage('/')} style={{ display: 'inline-flex', alignItems: 'center', gap: 10, marginBottom: 22 }}>
+              <img src="/genyx-logo.svg" alt="Genyx" style={{
+                width: 38, height: 38, borderRadius: '50%',
                 objectFit: 'cover',
-                objectPosition: 'center',
-                border: '1px solid var(--bd)',
-                display: 'block',
-              }}
-            />
-            <span style={{ color: 'var(--txt)', fontSize: 12, letterSpacing: '.12em', textTransform: 'uppercase', fontWeight: 600 }}>Genyx</span>
-          </a>
-          <span style={{ fontSize: 11, color: 'var(--dim)', letterSpacing: '.08em', transition: 'color .4s ease', textAlign: 'center' }}>
-            Movement is data. Data is truth.
-          </span>
-          <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                border: '1px solid rgba(255,255,255,.1)',
+              }} />
+              <span style={{ color: '#fff', fontSize: 13, letterSpacing: '.15em', textTransform: 'uppercase', fontWeight: 700 }}>
+                Genyx
+              </span>
+            </a>
+            <p style={{ color: '#555', fontSize: 13, lineHeight: 1.75, maxWidth: 360, marginBottom: 20 }}>
+              AI-powered movement intelligence for coaches and athletes. Precision biomechanics without wearables.
+            </p>
+            <p style={{ color: '#444', fontSize: 12, lineHeight: 1.7, marginBottom: 24 }}>
+              For suggestions, feedback, or partnership inquiries, we'd love to hear from you.
+            </p>
+            {/* Socials */}
+            <div style={{ display: 'flex', gap: 8 }}>
+              <a href="https://linkedin.com/company/genyx" target="_blank" rel="noopener noreferrer" className="ft-social" style={socialBtn}><LinkedInIcon /></a>
+              <a href="https://instagram.com/genyx" target="_blank" rel="noopener noreferrer" className="ft-social" style={socialBtn}><InstagramIcon /></a>
+              <a href="https://x.com/genyx" target="_blank" rel="noopener noreferrer" className="ft-social" style={socialBtn}><XIcon /></a>
+            </div>
+          </div>
+
+          {/* Col 2 - Navigation */}
+          <div>
+            <h4 style={colHead}>Navigate</h4>
             {[
+              ['Home', '/'],
               ['Platform', '/platform'],
               ['Analytics', '/analytics'],
+              ['About', '/about'],
               ['Contact', '/contact'],
             ].map(([label, path]) => (
-              <a key={label} href={path} onClick={goPage(path)} className="nl" style={{ fontSize: 12 }}>{label}</a>
+              <a key={label} href={path} onClick={goPage(path)} className="ft-link" style={colLink}>{label}</a>
             ))}
           </div>
+
+          {/* Col 3 - Contact */}
+          <div>
+            <h4 style={colHead}>Contact Us</h4>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4DFFEF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+              </svg>
+              <a href="mailto:labs@genyxfitness.com" className="ft-link" style={{ color: '#888', fontSize: 13, transition: 'color .3s ease' }}>
+                labs@genyxfitness.com
+              </a>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4DFFEF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+              </svg>
+              <a href="tel:+919990211844" className="ft-link" style={{ color: '#888', fontSize: 13, transition: 'color .3s ease' }}>
+                +91 9990211844
+              </a>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 18 }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4DFFEF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: 2, flexShrink: 0 }}>
+                <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
+              </svg>
+              <a
+                href="https://www.google.com/maps/search/?api=1&query=Golf+Course+Road%2C+DLF+Phase+5%2C+Sector+43%2C+Gurugram%2C+Haryana+122002%2C+India"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ft-link"
+                style={{ color: '#888', fontSize: 13, lineHeight: 1.6 }}
+              >
+                Golf Course Road, DLF Phase 5,<br />
+                Sector 43, Gurugram, Haryana 122002, India
+              </a>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4DFFEF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+              </svg>
+              <span style={{ color: '#888', fontSize: 13 }}>
+                Mon – Sat, 10 AM – 7 PM IST
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Bar */}
+      <div style={{
+        borderTop: '1px solid rgba(255,255,255,.06)',
+        padding: '18px 80px',
+        position: 'relative', zIndex: 1,
+      }}>
+        <div className="footer-bottom-grid" style={{
+          maxWidth: 1100, margin: '0 auto',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          flexWrap: 'wrap', gap: 10,
+        }}>
+          <div style={{ display: 'flex', gap: 20 }}>
+            <a href="/privacy" onClick={goPage('/privacy')} className="ft-link" style={{ fontSize: 11, color: '#555', transition: 'color .3s ease' }}>Privacy Policy</a>
+            <a href="/terms" onClick={goPage('/terms')} className="ft-link" style={{ fontSize: 11, color: '#555', transition: 'color .3s ease' }}>Terms & Conditions</a>
+          </div>
+          <span style={{ fontSize: 11, color: '#333', letterSpacing: '.05em' }}>
+            &copy; {new Date().getFullYear()} Genyx Fitness&trade;. All Rights Reserved.
+          </span>
         </div>
       </div>
     </footer>
@@ -1337,15 +1483,6 @@ export function ContactPage() {
     setForm((f) => ({ ...f, [k]: option }));
     setErrors((prev) => ({ ...prev, [k]: '' }));
   };
-  const goPage = (path) => (e) => {
-    e.preventDefault();
-    if (window.location.pathname !== path) {
-      window.history.pushState({}, '', path);
-      window.dispatchEvent(new PopStateEvent('popstate'));
-    }
-    window.scrollTo({ top: 0, behavior: 'instant' });
-  };
-
   const switchRole = (next) => {
     if (next === activeRole) return;
     setSent(false);
@@ -1407,10 +1544,21 @@ export function ContactPage() {
     setErrors(eMap);
     if (Object.keys(eMap).length) return;
     setSubmitting(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    setSubmitting(false);
-    setSubmitted({ firstName: form.firstName || 'there', email: form.email });
-    setSent(true);
+    try {
+      const res = await fetch('https://genyx-backend.onrender.com/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: activeRole, form }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Something went wrong');
+      setSubmitted({ firstName: form.firstName || 'there', email: form.email });
+      setSent(true);
+    } catch (err) {
+      setErrors({ submit: err.message || 'Failed to send. Please try again.' });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const err = (k) => errors[k] ? <div className="contact-err">{errors[k]}</div> : null;
@@ -1899,8 +2047,8 @@ export function PlatformPage() {
               Precision-built for performance environments. Weighted aluminum base. Ball-head articulation. Internal cable management.
             </p>
           </div>
-          <div className="r" style={{ position: 'relative', borderRadius: '20px 20px 0 0', overflow: 'hidden', aspectRatio: '16/7', transitionDelay: '.15s' }}>
-            <img src={podImg} alt="Genyx Pod in gym" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 55%', display: 'block' }} />
+          <div className="r" style={{ position: 'relative', borderRadius: '20px 20px 0 0', overflow: 'hidden', aspectRatio: '16/9', transitionDelay: '.15s', background: '#0a0a0a' }}>
+            <img src={podAestheticImg} alt="Genyx Pod in gym" style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center', display: 'block' }} />
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.1) 45%, rgba(0,0,0,0.35) 100%)' }} />
             <div style={{ position: 'absolute', bottom: 32, left: 36 }}>
               <span style={{ fontSize: 9, color: 'rgba(77,255,239,.8)', letterSpacing: '.2em', textTransform: 'uppercase', display: 'block', marginBottom: 4 }}>Genyx Pod - Floor Stand</span>

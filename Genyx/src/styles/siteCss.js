@@ -70,6 +70,12 @@ a, button { cursor: none; text-decoration: none; }
 .nl { color: var(--sub); font-size: 13px; transition: color .25s ease; }
 .nl:hover { color: var(--txt); }
 
+/* ── Footer link (always dark bg) ── */
+.ft-link { text-decoration: none; transition: color .25s ease; cursor: none; }
+.ft-link:hover { color: #fff!important; }
+.ft-social { text-decoration: none; cursor: none; transition: color .25s ease, border-color .25s ease; }
+.ft-social:hover { color: #4DFFEF!important; border-color: rgba(77,255,239,.3)!important; }
+
 /* ── CTA pill ── */
 .cp { position: relative; overflow: hidden; transition: color .38s ease; }
 .cp::before {
@@ -227,25 +233,48 @@ a, button { cursor: none; text-decoration: none; }
 .team-core-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .team-img-wrap {
   width: 100%;
-  aspect-ratio: 4/5;
-  display: grid;
-  place-items: end center;
-  background: linear-gradient(160deg, var(--bg3), var(--bg2));
+  aspect-ratio: 3/4;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: linear-gradient(180deg, #0c0c0c 0%, #111 50%, #0e0e0e 100%);
   border-bottom: 1px solid var(--bd);
-  padding: 18px 14px 0;
   overflow: hidden;
+  position: relative;
 }
 .team-img-person {
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  object-position: center bottom;
+  object-fit: cover;
+  object-position: top center;
   display: block;
-  transform-origin: center bottom;
+}
+.team-img-person.blend-dark {
+  mix-blend-mode: multiply;
 }
 .team-img-temp {
-  place-items: center;
-  padding: 0;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #151515 0%, #1a1a1a 100%);
+}
+.team-linkedin-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(6, 8, 12, 0.78);
+  border: 1px solid rgba(255,255,255,0.16);
+  color: #e9f7ff;
+  transition: border-color .25s ease, color .25s ease, background .25s ease, transform .25s ease;
+  flex-shrink: 0;
+}
+.team-linkedin-btn:hover {
+  border-color: rgba(77,255,239,.6);
+  color: #4DFFEF;
+  background: rgba(8, 14, 20, 0.92);
+  transform: translateY(-1px);
 }
 
 /* ── Contact Page ── */
@@ -413,11 +442,16 @@ a, button { cursor: none; text-decoration: none; }
   .contact-chip-grid { justify-self: start!important; width: 100%!important; grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .contact-form-grid { grid-template-columns: 1fr!important; }
   .contact-info { display: none!important; }
+  .footer-main-grid {
+    grid-template-columns: 1fr 1fr!important;
+    gap: 36px!important;
+  }
   .footer-bottom-grid {
-    grid-template-columns: 1fr!important;
-    justify-items: center!important;
+    justify-content: center!important;
     text-align: center!important;
-    gap: 12px!important;
+    flex-direction: column!important;
+    align-items: center!important;
+    gap: 8px!important;
   }
 }
 @media (max-width:600px) {
@@ -447,6 +481,14 @@ a, button { cursor: none; text-decoration: none; }
   .contact-role-btn { padding:18px!important; }
   .contact-form-card { padding:20px!important; }
   .team-core-grid { grid-template-columns: 1fr!important; }
+  .footer-main-grid { grid-template-columns: 1fr!important; gap: 32px!important; }
+  .footer-bottom-grid {
+    justify-content: center!important;
+    flex-direction: column!important;
+    align-items: center!important;
+    text-align: center!important;
+    gap: 8px!important;
+  }
 }
 
 /* ── Form input ── */

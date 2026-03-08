@@ -75,8 +75,7 @@ export function Nav({ theme, toggleTheme, page, setPage }) {
               borderRadius: '50%',
               objectFit: 'cover',
               objectPosition: 'center',
-              transform: 'scale(1.2)',
-              border: '1px solid var(--bd)',
+              border: '1px solid rgba(255,255,255,.1)',
               display: 'block',
             }}
           />
