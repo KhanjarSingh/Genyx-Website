@@ -1,5 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useReveal } from '../hooks/useReveal';
+import { useMobileShowcaseMotion } from '../hooks/useMobileShowcaseMotion';
+import { useTiltFx } from '../hooks/useTiltFx';
+import HeroCamera3D from '../components/HeroCamera3D';
 import podImg from '../assets/pod1.jpeg';
 import podSpec from '../assets/pod2.jpeg';
 import mobileHandImg from '../assets/Mobile.jpeg';
@@ -106,6 +109,8 @@ function PodSVG({ size = 300 }) {
 // ─── Hero ─────────────────────────────────────────────────────────────────────────
 function Hero() {
   const cvs = useRef(null);
+  const heroStageRef = useRef(null);
+  const podWrapRef = useRef(null);
 
   useEffect(() => {
     document.querySelectorAll('.hw').forEach((el, i) =>
@@ -144,6 +149,68 @@ function Hero() {
     };
     draw();
     return () => { cancelAnimationFrame(raf); ro.disconnect(); };
+  }, []);
+
+  useEffect(() => {
+    const stage = heroStageRef.current;
+    const pod = podWrapRef.current;
+    if (!stage || !pod) return undefined;
+
+    let raf = 0;
+    let tx = 0;
+    let ty = 0;
+    let mx = 0;
+    let my = 0;
+
+    const animate = () => {
+      tx += (mx - tx) * 0.08;
+      ty += (my - ty) * 0.08;
+      pod.style.setProperty('--hero-tilt-x', `${tx.toFixed(2)}deg`);
+      pod.style.setProperty('--hero-tilt-y', `${ty.toFixed(2)}deg`);
+      raf = requestAnimationFrame(animate);
+    };
+
+    const onPointerMove = (e) => {
+      const rect = stage.getBoundingClientRect();
+      const px = (e.clientX - rect.left) / rect.width - 0.5;
+      const py = (e.clientY - rect.top) / rect.height - 0.5;
+      mx = px * 12;
+      my = py * -12;
+      stage.style.setProperty('--hero-parallax-x', `${px * 22}px`);
+      stage.style.setProperty('--hero-parallax-y', `${py * -18}px`);
+      stage.style.setProperty('--hero-lens-x', `${52 + px * 22}%`);
+      stage.style.setProperty('--hero-lens-y', `${44 + py * 16}%`);
+    };
+
+    const onPointerLeave = () => {
+      mx = 0;
+      my = 0;
+      stage.style.setProperty('--hero-parallax-x', '0px');
+      stage.style.setProperty('--hero-parallax-y', '0px');
+      stage.style.setProperty('--hero-lens-x', '52%');
+      stage.style.setProperty('--hero-lens-y', '44%');
+    };
+
+    const onScroll = () => {
+      const rect = stage.getBoundingClientRect();
+      const vh = window.innerHeight || 1;
+      const progress = Math.max(0, Math.min(1, (vh - rect.top) / (vh + rect.height)));
+      stage.style.setProperty('--hero-scroll-y', `${(0.5 - progress) * 44}px`);
+    };
+
+    stage.addEventListener('pointermove', onPointerMove, { passive: true });
+    stage.addEventListener('pointerleave', onPointerLeave, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    onScroll();
+    raf = requestAnimationFrame(animate);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      stage.removeEventListener('pointermove', onPointerMove);
+      stage.removeEventListener('pointerleave', onPointerLeave);
+      window.removeEventListener('scroll', onScroll);
+    };
   }, []);
 
   return (
@@ -211,10 +278,24 @@ function Hero() {
           </button>
         </div>
 
-        {/* Pod illustration — floating below text */}
-        <div className="hw" style={{ marginTop: 64, display: 'flex', justifyContent: 'center', animationDelay: '1.18s' }}>
-          <div style={{ filter: 'drop-shadow(0 0 60px rgba(77,255,239,.1))' }}>
-            <PodSVG size={220} />
+        {/* Interactive camera intelligence stage */}
+        <div ref={heroStageRef} className="hero-stage hw" style={{ marginTop: 64, animationDelay: '1.18s' }}>
+          <div className="hero-orbit hero-orbit-a" />
+          <div className="hero-orbit hero-orbit-b" />
+          <div className="hero-chip hero-chip-l">LIVE SIGNAL</div>
+          <div className="hero-chip hero-chip-r">QUALITY 94%</div>
+          <div className="hero-chip hero-chip-b">LATENCY 180ms</div>
+
+          <div ref={podWrapRef} className="hero-pod-wrap">
+            <div className="hero-pod-halo" />
+            <div className="hero-pod-scan" />
+            <div className="hero-pod-reflection" />
+            <div className="hero-webgl-wrap">
+              <HeroCamera3D />
+            </div>
+            <div className="hero-svg-fallback">
+              <PodSVG size={220} />
+            </div>
           </div>
         </div>
       </div>
@@ -480,12 +561,12 @@ function LiveDash() {
 
           {/* Main metrics */}
           <div className="g3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1, background: 'var(--div)' }}>
-            {[
-              { label: 'Clean Reps', value: '68', sub: 'This session', accent: false },
-              { label: 'Effort Consistency', value: '94%', sub: 'Above threshold', accent: false },
-              { label: 'Rep Quality', value: '●', sub: 'Solid', accent: true },
-            ].map(({ label, value, sub, accent }) => (
-              <div key={label} style={{ background: 'var(--card)', padding: '40px 36px', textAlign: 'center', transition: 'background .4s ease' }}>
+              {[
+                { label: 'Clean Reps', value: '68', sub: 'This session', accent: false },
+                { label: 'Effort Consistency', value: '94%', sub: 'Above threshold', accent: false },
+                { label: 'Rep Quality', value: '●', sub: 'Solid', accent: true },
+              ].map(({ label, value, sub, accent }) => (
+              <div key={label} data-tilt style={{ background: 'var(--card)', padding: '40px 36px', textAlign: 'center', transition: 'background .4s ease' }}>
                 <div style={{ fontSize: 9, color: 'var(--sub)', letterSpacing: '.18em', textTransform: 'uppercase', marginBottom: 12, transition: 'color .4s ease' }}>{label}</div>
                 {accent ? (
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
@@ -608,7 +689,7 @@ function PostWorkout() {
 
           {/* Summary card */}
           <div>
-            <div ref={cardRef} className="sc sc-p" style={{
+            <div ref={cardRef} className="sc sc-p" data-tilt style={{
               background: 'var(--card)', border: '1px solid var(--bd)',
               borderRadius: 24, padding: 36,
               boxShadow: 'var(--sh)',
@@ -699,6 +780,10 @@ function HowItWorks() {
 // ─── App Preview ─────────────────────────────────────────────────────────────────
 function AppPreview() {
   useReveal();
+  const zoneRef = useRef(null);
+  const phoneRef = useRef(null);
+  useMobileShowcaseMotion(zoneRef, phoneRef);
+
   return (
     <section style={{ background: '#050505', overflow: 'hidden', position: 'relative' }}>
       {/* Always-dark section — accent color and white text forced */}
@@ -734,9 +819,14 @@ function AppPreview() {
       </div>
 
       {/* Handset preview — live screen fitted into in-hand phone */}
-      <div className="app-hand-zone">
+      <div ref={zoneRef} className="app-hand-zone app-showcase-3d">
         <div className="app-hand-glow" />
-        <div className="app-hand-wrap r" style={{ transitionDelay: '.16s' }}>
+        <div className="app-orbit app-orbit-a" />
+        <div className="app-orbit app-orbit-b" />
+        <div className="app-data-chip app-chip-l">LIVE FORM</div>
+        <div className="app-data-chip app-chip-r">FATIGUE: LOW</div>
+
+        <div ref={phoneRef} className="app-hand-wrap r app-hand-wrap-3d" style={{ transitionDelay: '.16s' }}>
           <div className="app-live-screen">
             <video
               src={DEMO_VIDEO}
@@ -747,7 +837,7 @@ function AppPreview() {
               style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
             />
           </div>
-          <img src={mobileHandImg} alt="Athlete holding Genyx live training intelligence mobile view" className="app-hand-img" />
+          <img src={mobileHandImg} alt="Athlete holding Genyx live training intelligence mobile view" className="app-hand-img" loading="lazy" />
         </div>
       </div>
 
@@ -825,7 +915,7 @@ function Testimonials() {
         <div className="tm-wrap r" style={{ transitionDelay: '.15s' }}>
           <div className="tm-track">
             {loopItems.map((t, i) => (
-              <article key={i} className="tm-card">
+              <article key={i} className="tm-card" data-tilt>
                 <p style={{ fontSize: 15, color: 'var(--txt)', lineHeight: 1.74, marginBottom: 18, transition: 'color .4s ease' }}>
                   "{t.quote}"
                 </p>
@@ -887,7 +977,7 @@ function TeamSection() {
 
         <div className="g3r" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16 }}>
           {team.map((m, i) => (
-            <article key={m.name} className="team-card r" style={{ transitionDelay: `${.12 + i * .08}s` }}>
+            <article key={m.name} className="team-card r" data-tilt style={{ transitionDelay: `${.12 + i * .08}s` }}>
               {m.img ? (
                 <img src={m.img} alt={m.name} className="team-img" loading="lazy" />
               ) : (
@@ -963,6 +1053,7 @@ function Footer() {
 // ─── About Page ───────────────────────────────────────────────────────────────────
 export function AboutPage() {
   useReveal();
+  useTiltFx();
   return (
     <>
       {/* Hero */}
@@ -1134,78 +1225,346 @@ export function AboutPage() {
 // ─── Contact Page ─────────────────────────────────────────────────────────────────
 export function ContactPage() {
   useReveal();
-  const [form, setForm] = useState({ name: '', email: '', facility: '', message: '' });
+  const inquiryTypes = [
+    { id: 'gym', label: 'Gym Pilot' },
+    { id: 'beta', label: 'Beta Tester' },
+    { id: 'investor', label: 'Investor' },
+    { id: 'product', label: 'Product Demo' },
+    { id: 'partner', label: 'Partnership' },
+  ];
+
+  const [form, setForm] = useState({
+    inquiry: 'gym',
+    name: '',
+    email: '',
+    phone: '',
+    organization: '',
+    role: '',
+    city: '',
+    country: '',
+    message: '',
+    timeline: '',
+
+    facilityType: '',
+    locations: '',
+    monthlySessions: '',
+    currentSystem: '',
+
+    betaRole: '',
+    sportType: '',
+    trainingFrequency: '',
+
+    fundName: '',
+    stageFocus: '',
+    checkSize: '',
+    portfolioFit: '',
+
+    demoGoal: '',
+    teamSize: '',
+    budgetRange: '',
+
+    partnershipType: '',
+    collaborationArea: '',
+    audienceSize: '',
+  });
   const [sent, setSent] = useState(false);
 
   const upd = k => e => setForm(f => ({ ...f, [k]: e.target.value }));
+  const currentInquiry = inquiryTypes.find(i => i.id === form.inquiry) || inquiryTypes[0];
 
   return (
     <>
       <section className="sp" style={{
-        minHeight: '100vh', display: 'flex', alignItems: 'center',
-        background: 'var(--bg)', paddingTop: 120, paddingBottom: 120,
+        minHeight: '100vh', display: 'flex', alignItems: 'flex-start',
+        background: 'var(--bg)', paddingTop: 130, paddingBottom: 120,
         paddingLeft: 80, paddingRight: 80, transition: 'background .4s ease',
       }}>
-        <div className="pw-sp" style={{ maxWidth: 1100, margin: '0 auto', width: '100%', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, alignItems: 'start' }}>
-          {/* Left */}
+        <div className="pw-sp" style={{ maxWidth: 1140, margin: '0 auto', width: '100%', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 58, alignItems: 'start' }}>
           <div>
-            <span className="tag r">Early Access</span>
+            <span className="tag r">Contact</span>
             <h1 className="r" style={{
-              fontSize: 'clamp(48px, 8vw, 100px)', fontWeight: 700,
+              fontSize: 'clamp(48px, 8vw, 98px)', fontWeight: 700,
               lineHeight: .95, letterSpacing: '-.034em',
               color: 'var(--txt)', transition: 'color .4s ease', transitionDelay: '.08s',
-              marginBottom: 32,
+              marginBottom: 26,
             }}>
-              Get early<br /><span style={{ color: 'var(--a)', transition: 'color .4s ease' }}>access.</span>
+              Let's build<br /><span style={{ color: 'var(--a)', transition: 'color .4s ease' }}>together.</span>
             </h1>
             <p className="r" style={{
               fontSize: 'clamp(15px, 1.6vw, 18px)', color: 'var(--sub)', lineHeight: 1.72,
               fontWeight: 300, transition: 'color .4s ease', transitionDelay: '.16s',
             }}>
-              Join the waitlist for coaches and performance facilities building the future of training. We're onboarding a select cohort now.
+              Built for serious conversations around facility pilots, product demos, investor discussions, and beta onboarding. Pick a path and we route it to the right team.
             </p>
-            <div className="r" style={{ marginTop: 48, display: 'flex', flexDirection: 'column', gap: 16, transitionDelay: '.24s' }}>
-              {[['Response time', '< 48 hours'], ['Access type', 'Pilot program'], ['Cost', 'Free during beta']].map(([k, v]) => (
-                <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '14px 0', borderBottom: '1px solid var(--div)' }}>
-                  <span style={{ fontSize: 13, color: 'var(--sub)', transition: 'color .4s ease' }}>{k}</span>
-                  <span style={{ fontSize: 13, color: 'var(--a)', fontWeight: 500, transition: 'color .4s ease' }}>{v}</span>
+
+            <div className="r" style={{ marginTop: 42, transitionDelay: '.24s' }}>
+              <div className="contact-panel">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                  <span style={{ fontSize: 10, color: 'var(--dim)', letterSpacing: '.16em', textTransform: 'uppercase' }}>High-priority requests</span>
+                  <span style={{ fontSize: 11, color: 'var(--a)', letterSpacing: '.08em', textTransform: 'uppercase', fontWeight: 500 }}>Genyx Intake</span>
+                </div>
+                <div style={{ display: 'grid', gap: 12 }}>
+                  {[
+                    ['Pilot rollout planning', 'Facility setup, pod count, and deployment timeline.'],
+                    ['Performance analytics demo', 'Live walkthrough of rep quality and fatigue signals.'],
+                    ['Investor conversation', 'Traction, roadmap, and data moat overview.'],
+                  ].map(([t, d]) => (
+                    <div key={t} style={{ border: '1px solid var(--div)', borderRadius: 12, padding: '12px 14px', background: 'var(--bg2)' }}>
+                      <div style={{ fontSize: 13, color: 'var(--txt)', fontWeight: 600, marginBottom: 4 }}>{t}</div>
+                      <div style={{ fontSize: 12, color: 'var(--sub)', lineHeight: 1.55 }}>{d}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="r" style={{ marginTop: 36, display: 'flex', flexDirection: 'column', gap: 14, transitionDelay: '.32s' }}>
+              {[['Response time', '< 48 hours'], ['Pilot readiness', 'Open'], ['Demo slots', 'Weekly'], ['Investor deck', 'On request']].map(([k, v]) => (
+                <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--div)' }}>
+                  <span style={{ fontSize: 12, color: 'var(--sub)', transition: 'color .4s ease' }}>{k}</span>
+                  <span style={{ fontSize: 12, color: 'var(--a)', fontWeight: 500, transition: 'color .4s ease' }}>{v}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Right — form */}
-          <div className="r" style={{ transitionDelay: '.12s' }}>
+          <div className="r contact-sticky" style={{ transitionDelay: '.12s' }}>
             {sent ? (
-              <div style={{
+              <div className="c-swap" style={{
                 background: 'var(--card)', border: '1px solid var(--bd)', borderRadius: 24,
                 padding: '72px 48px', textAlign: 'center', transition: 'background .4s ease, border-color .4s ease',
               }}>
                 <div style={{ fontSize: 48, marginBottom: 24 }}>✓</div>
-                <h3 style={{ fontSize: 24, fontWeight: 600, color: 'var(--txt)', marginBottom: 12, transition: 'color .4s ease' }}>You're on the list.</h3>
-                <p style={{ fontSize: 15, color: 'var(--sub)', lineHeight: 1.65, transition: 'color .4s ease' }}>We'll be in touch within 48 hours.</p>
+                <h3 style={{ fontSize: 24, fontWeight: 600, color: 'var(--txt)', marginBottom: 12, transition: 'color .4s ease' }}>Inquiry received.</h3>
+                <p style={{ fontSize: 15, color: 'var(--sub)', lineHeight: 1.65, transition: 'color .4s ease' }}>
+                  Thanks for reaching out about <span style={{ color: 'var(--a)' }}>{currentInquiry.label}</span>. Our team will respond within 48 hours.
+                </p>
+                <button type="button" className="cp" onClick={() => setSent(false)} style={{
+                  marginTop: 28, background: 'transparent', border: '1px solid var(--bd)',
+                  borderRadius: 12, padding: '12px 22px',
+                  color: 'var(--txt)', fontSize: 12, fontWeight: 500, letterSpacing: '.06em',
+                }}>
+                  <span>Submit Another Inquiry</span>
+                </button>
               </div>
             ) : (
-              <form onSubmit={e => { e.preventDefault(); setSent(true); }} style={{
-                background: 'var(--card)', border: '1px solid var(--bd)', borderRadius: 24,
-                padding: '48px 40px', display: 'flex', flexDirection: 'column', gap: 16,
-                transition: 'background .4s ease, border-color .4s ease',
-              }}>
+              <form
+                onSubmit={e => { e.preventDefault(); setSent(true); }}
+                className="c-swap"
+                style={{
+                  background: 'var(--card)', border: '1px solid var(--bd)', borderRadius: 24,
+                  padding: '48px 40px', display: 'flex', flexDirection: 'column', gap: 16,
+                  transition: 'background .4s ease, border-color .4s ease',
+                }}
+              >
+                <div className="iq-pills">
+                  {inquiryTypes.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => {
+                        setSent(false);
+                        setForm((f) => ({ ...f, inquiry: item.id }));
+                      }}
+                      className={`iq-pill${form.inquiry === item.id ? ' is-active' : ''}`}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+
                 <div>
-                  <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8, transition: 'color .4s ease' }}>Your Name</div>
+                  <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8 }}>Full Name</div>
                   <input className="fi" type="text" placeholder="Full name" value={form.name} onChange={upd('name')} required />
                 </div>
-                <div>
-                  <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8, transition: 'color .4s ease' }}>Email Address</div>
-                  <input className="fi" type="email" placeholder="you@yourgym.com" value={form.email} onChange={upd('email')} required />
+
+                <div className="g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div>
+                    <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8 }}>Work Email</div>
+                    <input className="fi" type="email" placeholder="you@company.com" value={form.email} onChange={upd('email')} required />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8 }}>Phone</div>
+                    <input className="fi" type="text" placeholder="+91 / +1 ..." value={form.phone} onChange={upd('phone')} />
+                  </div>
                 </div>
-                <div>
-                  <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8, transition: 'color .4s ease' }}>Gym / Facility Name</div>
-                  <input className="fi" type="text" placeholder="Your gym or facility" value={form.facility} onChange={upd('facility')} />
+
+                <div className="g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div>
+                    <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8 }}>Organization</div>
+                    <input className="fi" type="text" placeholder="Gym / team / company / fund" value={form.organization} onChange={upd('organization')} required />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8 }}>Role</div>
+                    <input className="fi" type="text" placeholder="Owner, Coach, Partner..." value={form.role} onChange={upd('role')} required />
+                  </div>
                 </div>
+
+                <div className="g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div>
+                    <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8 }}>City</div>
+                    <input className="fi" type="text" placeholder="City" value={form.city} onChange={upd('city')} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8 }}>Country</div>
+                    <input className="fi" type="text" placeholder="Country" value={form.country} onChange={upd('country')} />
+                  </div>
+                </div>
+
+                <div key={form.inquiry} className="c-swap" style={{ display: 'grid', gap: 12 }}>
+                  {form.inquiry === 'gym' && (
+                    <>
+                      <div className="g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                        <div>
+                          <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8 }}>Facility Type</div>
+                          <select className="fi" value={form.facilityType} onChange={upd('facilityType')} required>
+                            <option value="">Select facility type</option>
+                            <option value="strength-performance">Strength & Performance</option>
+                            <option value="commercial-gym">Commercial Gym</option>
+                            <option value="college-center">College / Academy</option>
+                            <option value="pro-team-center">Pro Team Center</option>
+                          </select>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8 }}>Number of Locations</div>
+                          <input className="fi" type="text" placeholder="1, 2, 5..." value={form.locations} onChange={upd('locations')} required />
+                        </div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8 }}>Monthly Training Sessions</div>
+                        <input className="fi" type="text" placeholder="Approximate sessions per month" value={form.monthlySessions} onChange={upd('monthlySessions')} required />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8 }}>Current Tracking Setup</div>
+                        <input className="fi" type="text" placeholder="Wearables, notes, spreadsheets..." value={form.currentSystem} onChange={upd('currentSystem')} />
+                      </div>
+                    </>
+                  )}
+
+                  {form.inquiry === 'beta' && (
+                    <>
+                      <div className="g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                        <div>
+                          <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8 }}>You Are</div>
+                          <select className="fi" value={form.betaRole} onChange={upd('betaRole')} required>
+                            <option value="">Select role</option>
+                            <option value="coach">Coach</option>
+                            <option value="athlete">Athlete</option>
+                            <option value="coach-athlete">Both coach + athlete</option>
+                          </select>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8 }}>Training Focus</div>
+                          <input className="fi" type="text" placeholder="Powerlifting, rehab, S&C..." value={form.sportType} onChange={upd('sportType')} required />
+                        </div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8 }}>Weekly Training Frequency</div>
+                        <input className="fi" type="text" placeholder="e.g., 4 sessions/week" value={form.trainingFrequency} onChange={upd('trainingFrequency')} />
+                      </div>
+                    </>
+                  )}
+
+                  {form.inquiry === 'investor' && (
+                    <>
+                      <div className="g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                        <div>
+                          <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8 }}>Fund Name</div>
+                          <input className="fi" type="text" placeholder="Fund / syndicate name" value={form.fundName} onChange={upd('fundName')} required />
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8 }}>Stage Focus</div>
+                          <select className="fi" value={form.stageFocus} onChange={upd('stageFocus')} required>
+                            <option value="">Select stage</option>
+                            <option value="pre-seed">Pre-seed</option>
+                            <option value="seed">Seed</option>
+                            <option value="series-a">Series A</option>
+                            <option value="growth">Growth</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8 }}>Typical Check Size</div>
+                        <input className="fi" type="text" placeholder="$250k - $1M..." value={form.checkSize} onChange={upd('checkSize')} required />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8 }}>Portfolio / Thesis Fit</div>
+                        <input className="fi" type="text" placeholder="Relevant companies or thesis" value={form.portfolioFit} onChange={upd('portfolioFit')} />
+                      </div>
+                    </>
+                  )}
+
+                  {form.inquiry === 'product' && (
+                    <>
+                      <div className="g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                        <div>
+                          <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8 }}>Demo Goal</div>
+                          <select className="fi" value={form.demoGoal} onChange={upd('demoGoal')} required>
+                            <option value="">Select goal</option>
+                            <option value="live-rep-validation">Live rep validation</option>
+                            <option value="fatigue-monitoring">Fatigue monitoring</option>
+                            <option value="team-analytics">Team analytics dashboard</option>
+                            <option value="multi-location">Multi-location analytics</option>
+                          </select>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8 }}>Team Size</div>
+                          <input className="fi" type="text" placeholder="Coaches / analysts / athletes" value={form.teamSize} onChange={upd('teamSize')} />
+                        </div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8 }}>Budget Range</div>
+                        <input className="fi" type="text" placeholder="Exploring or allocated range" value={form.budgetRange} onChange={upd('budgetRange')} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8 }}>Expected Timeline</div>
+                        <input className="fi" type="text" placeholder="Immediate / next quarter..." value={form.timeline} onChange={upd('timeline')} required />
+                      </div>
+                    </>
+                  )}
+
+                  {form.inquiry === 'partner' && (
+                    <>
+                      <div className="g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                        <div>
+                          <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8 }}>Partnership Type</div>
+                          <select className="fi" value={form.partnershipType} onChange={upd('partnershipType')} required>
+                            <option value="">Select type</option>
+                            <option value="technology">Technology integration</option>
+                            <option value="distribution">Distribution / reseller</option>
+                            <option value="media">Media / content</option>
+                            <option value="research">Research collaboration</option>
+                          </select>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8 }}>Collaboration Area</div>
+                          <input className="fi" type="text" placeholder="What to build together" value={form.collaborationArea} onChange={upd('collaborationArea')} required />
+                        </div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8 }}>Audience / Reach</div>
+                        <input className="fi" type="text" placeholder="Community size, channels, footprint..." value={form.audienceSize} onChange={upd('audienceSize')} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8 }}>Expected Timeline</div>
+                        <input className="fi" type="text" placeholder="Immediate / next quarter..." value={form.timeline} onChange={upd('timeline')} required />
+                      </div>
+                    </>
+                  )}
+                </div>
+
                 <div>
-                  <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8, transition: 'color .4s ease' }}>Message (optional)</div>
-                  <textarea className="fi" placeholder="Tell us about your training setup…" rows={4} value={form.message} onChange={upd('message')} />
+                  <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8 }}>
+                    Message
+                  </div>
+                  <textarea
+                    className="fi"
+                    placeholder="Share goals, constraints, and what success looks like for your use case."
+                    rows={4}
+                    value={form.message}
+                    onChange={upd('message')}
+                    required
+                  />
                 </div>
                 <button type="submit" className="cp" style={{
                   marginTop: 8, background: 'var(--at)', border: '1px solid var(--a)',
@@ -1213,7 +1572,7 @@ export function ContactPage() {
                   color: 'var(--a)', fontSize: 13, fontWeight: 500, letterSpacing: '.06em',
                   transition: 'color .38s ease, border-color .4s ease, background .4s ease',
                 }}>
-                  <span>Request Early Access →</span>
+                  <span>Send Inquiry →</span>
                 </button>
               </form>
             )}
@@ -1229,10 +1588,11 @@ export function ContactPage() {
 // ─── Platform Page ────────────────────────────────────────────────────────────────
 export function PlatformPage() {
   useReveal();
+  useTiltFx();
   return (
     <>
       {/* Hero */}
-      <section className="sp" style={{
+      <section className="sp fx-grid" style={{
         minHeight: '88vh', display: 'flex', alignItems: 'center',
         background: 'var(--bg)', paddingTop: 140, paddingBottom: 120,
         paddingLeft: 80, paddingRight: 80, transition: 'background .4s ease',
@@ -1364,7 +1724,7 @@ export function PlatformPage() {
               ['Session-Level History', 'Every rep from every session is stored. Track improvement, fatigue patterns, and injury risk across weeks.'],
               ['Coach + Athlete Views', 'Separate views for coaching staff and athletes. The right data, in the right hands, at the right time.'],
             ].map(([title, desc], i) => (
-              <div key={i} className="r dc" style={{ borderRadius: 0, border: 'none', transitionDelay: `${.06 + i * .07}s` }}>
+            <div key={i} className="r dc" data-tilt style={{ borderRadius: 0, border: 'none', transitionDelay: `${.06 + i * .07}s` }}>
                 <h3 style={{ fontSize: 17, fontWeight: 600, marginBottom: 12, color: 'var(--txt)', transition: 'color .4s ease' }}>{title}</h3>
                 <p style={{ fontSize: 14, color: 'var(--sub)', lineHeight: 1.72, fontWeight: 300, transition: 'color .4s ease' }}>{desc}</p>
               </div>
@@ -1381,10 +1741,11 @@ export function PlatformPage() {
 // ─── Analytics Page ───────────────────────────────────────────────────────────────
 export function AnalyticsPage() {
   useReveal();
+  useTiltFx();
   return (
     <>
       {/* Hero */}
-      <section className="sp" style={{
+      <section className="sp fx-grid" style={{
         minHeight: '80vh', display: 'flex', alignItems: 'center',
         background: 'var(--bg)', paddingTop: 140, paddingBottom: 120,
         paddingLeft: 80, paddingRight: 80, transition: 'background .4s ease',
@@ -1429,7 +1790,7 @@ export function AnalyticsPage() {
               ['Joint Angles', 'Hip, knee, and shoulder angles tracked at key phases of each lift — without any body-worn sensors.'],
               ['Effort Drop-Off', 'The exact rep where output declined. Not an estimate — derived from frame-level movement data.'],
             ].map(([title, desc], i) => (
-              <div key={i} className="r" style={{
+              <div key={i} className="r" data-tilt style={{
                 background: 'var(--card)', padding: '40px 36px',
                 transition: 'background .4s ease', transitionDelay: `${.06 + i * .08}s`,
               }}>
@@ -1530,6 +1891,7 @@ export function AnalyticsPage() {
 
 
 export function HomePage() {
+  useTiltFx();
   return (
     <>
       <Hero />
