@@ -817,7 +817,7 @@ function Testimonials() {
             img: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=160&q=80',
         },
         {
-            quote: 'I used to struggle with maintaining correct posture during workouts. With Genyx\'s real-time analysis, I can see exactly where I need to improve. My workouts are now safer and more effective.',
+            quote: 'I used to struggle with maintaining correct posture during workouts. With Genyx\'s realtime analysis, I can see exactly where I need to improve. My workouts are now safer and more effective.',
             name: 'Priya Sharma',
             role: 'Software Engineer, Bengaluru',
             img: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=160&q=80',
@@ -841,13 +841,7 @@ function Testimonials() {
             img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=160&q=80',
         },
         {
-            quote: 'As someone who works out at home, Genyx is a game-changer. The motion tracking ensures I\'m doing exercises correctly without needing a physical trainer.',
-            name: 'Ananya Iyer',
-            role: 'Graphic Designer, Chennai',
-            img: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=160&q=80',
-        },
-        {
-            quote: 'I\'ve tried many fitness apps, but Genyx stands out because of its intelligent movement analysis and personalized feedback. It truly elevates the training experience.',
+            quote: 'I\'ve tried many fitness apps, but Genyx stands out because of its intelligent movement analysis and personalised feedback. It truly elevates the training experience.',
             name: 'Rohan Deshmukh',
             role: 'Student, Kolkata',
             img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=160&q=80',
