@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useReveal } from '../hooks/useReveal';
+import ArduCamModule3 from '../components/ArduCamModule3';
 import podImg from '../assets/pod1.jpeg';
 import podSpec from '../assets/pod2.jpeg';
 import mobileHandImg from '../assets/Mobile.jpeg';
@@ -211,10 +212,10 @@ function Hero() {
           </button>
         </div>
 
-        {/* Pod illustration — floating below text */}
+        {/* 3D Arducam hero object */}
         <div className="hw" style={{ marginTop: 64, display: 'flex', justifyContent: 'center', animationDelay: '1.18s' }}>
-          <div style={{ filter: 'drop-shadow(0 0 60px rgba(77,255,239,.1))' }}>
-            <PodSVG size={220} />
+          <div className="hero-cam-wrap">
+            <ArduCamModule3 />
           </div>
         </div>
       </div>
@@ -1132,12 +1133,216 @@ export function AboutPage() {
 }
 
 // ─── Contact Page ─────────────────────────────────────────────────────────────────
+function ContactSelect({ label, value, options, onChange, error }) {
+  const [open, setOpen] = useState(false);
+  const boxRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const onDown = (e) => {
+      if (!boxRef.current?.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, [open]);
+
+  return (
+    <div ref={boxRef} className="contact-dd-wrap">
+      <label className={`contact-lbl${error ? ' is-err' : ''}`}>{label}</label>
+      <button
+        type="button"
+        className={`contact-dd-btn${error ? ' is-err' : ''}`}
+        onClick={() => setOpen((v) => !v)}
+        data-h
+      >
+        <span>{value || 'Select'}</span>
+        <span className={`contact-dd-caret${open ? ' is-open' : ''}`}>⌄</span>
+      </button>
+      {open && (
+        <div className="contact-dd-list">
+          {options.map((opt) => (
+            <button
+              type="button"
+              key={opt}
+              className={`contact-dd-item${value === opt ? ' is-active' : ''}`}
+              onClick={() => {
+                onChange(opt);
+                setOpen(false);
+              }}
+              data-h
+            >
+              {opt}
+            </button>
+          ))}
+        </div>
+      )}
+      {error ? <div className="contact-err">{error}</div> : null}
+    </div>
+  );
+}
+
 export function ContactPage() {
   useReveal();
-  const [form, setForm] = useState({ name: '', email: '', facility: '', message: '' });
-  const [sent, setSent] = useState(false);
+  const roleData = {
+    beta: {
+      icon: '♛',
+      name: 'Beta Tester',
+      desc: 'Pilot Genyx in your facility before launch.',
+      tag: 'Beta Access',
+      response: '48h',
+      purpose: 'Early B2B pilot for coaching teams and facilities testing live movement intelligence.',
+      checklist: ['Pilot onboarding call', 'Facility-fit review', 'Deployment recommendation', 'Priority beta access'],
+      next: 'Our onboarding team will review your setup and schedule the best pilot path.',
+    },
+    investor: {
+      icon: '◈',
+      name: 'Investor',
+      desc: 'Explore the opportunity. Request our deck or a call.',
+      tag: 'Investment',
+      response: '24h',
+      purpose: 'For investor conversations around traction, roadmap, and category scale.',
+      checklist: ['Deck request handling', 'Roadmap + moat walkthrough', 'Partner Q&A', 'Founder call scheduling'],
+      next: 'You will hear from the core team with next steps for deck sharing and discussion.',
+    },
+    product: {
+      icon: '◎',
+      name: 'Product Inquiry',
+      desc: 'Pricing, specs, demo, or deployment questions.',
+      tag: 'Inquiry',
+      response: '1 day',
+      purpose: 'For teams evaluating deployment, integrations, pricing, and roll-out fit.',
+      checklist: ['Use-case qualification', 'Technical requirements review', 'Deployment path mapping', 'Demo planning'],
+      next: 'A product specialist will reply with recommended rollout options for your requirements.',
+    },
+    other: {
+      icon: '∿',
+      name: 'Other',
+      desc: 'Press, research, partnerships, or anything else.',
+      tag: 'General',
+      response: '2-3 days',
+      purpose: 'For media, research, partnership, event, and general requests.',
+      checklist: ['Request routing', 'Internal owner assignment', 'Response timeline', 'Direct follow-up'],
+      next: 'We will route your request internally and come back with a clear next step.',
+    },
+  };
 
-  const upd = k => e => setForm(f => ({ ...f, [k]: e.target.value }));
+  const [activeRole, setActiveRole] = useState('beta');
+  const [formPhase, setFormPhase] = useState('in');
+  const [submitting, setSubmitting] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [submitted, setSubmitted] = useState({ firstName: '', email: '' });
+  const [errors, setErrors] = useState({});
+  const [form, setForm] = useState({
+    firstName: '', lastName: '', email: '',
+    roleTitle: '', facilityName: '', facilityType: '', city: '', country: '', memberRange: 1,
+    trainingTracking: [], painPoint: '', startTimeline: '', betaNotes: '',
+    firmName: '', investorType: '', checkSize: '', thesisAlignment: [], investorInterest: '', investorNotes: '', ndaAccepted: false,
+    company: '', inquiryType: '', deploymentScale: '', integrations: [], decisionTimeline: '', productQuestion: '',
+    otherOrg: '', otherTopic: '', otherMessage: '',
+  });
+
+  const switchTimeoutRef = useRef(null);
+  const formZoneRef = useRef(null);
+  const memberRanges = ['1-24 members', '25-100 members', '101-250 members', '251-500 members', '500+ members'];
+  const activeMeta = roleData[activeRole];
+
+  useEffect(() => () => {
+    if (switchTimeoutRef.current) clearTimeout(switchTimeoutRef.current);
+  }, []);
+
+  const upd = (k) => (e) => {
+    const v = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+    setForm((f) => ({ ...f, [k]: v }));
+    setErrors((prev) => ({ ...prev, [k]: '' }));
+  };
+  const toggleMulti = (k, option) => {
+    setForm((f) => {
+      const next = f[k].includes(option) ? f[k].filter((x) => x !== option) : [...f[k], option];
+      return { ...f, [k]: next };
+    });
+    setErrors((prev) => ({ ...prev, [k]: '' }));
+  };
+  const setRadio = (k, option) => {
+    setForm((f) => ({ ...f, [k]: option }));
+    setErrors((prev) => ({ ...prev, [k]: '' }));
+  };
+  const goPage = (path) => (e) => {
+    e.preventDefault();
+    if (window.location.pathname !== path) {
+      window.history.pushState({}, '', path);
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    }
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+
+  const switchRole = (next) => {
+    if (next === activeRole) return;
+    setSent(false);
+    setErrors({});
+    setSubmitting(false);
+    setFormPhase('out');
+    if (switchTimeoutRef.current) clearTimeout(switchTimeoutRef.current);
+    switchTimeoutRef.current = setTimeout(() => {
+      setActiveRole(next);
+      setFormPhase('in');
+      formZoneRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  };
+
+  const validate = () => {
+    const e = {};
+    const req = (k, m) => { if (!String(form[k] || '').trim()) e[k] = m; };
+    req('firstName', 'First name is required');
+    req('lastName', 'Last name is required');
+    req('email', 'Email is required');
+    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = 'Enter a valid email address';
+
+    if (activeRole === 'beta') {
+      req('roleTitle', 'Select role/title');
+      req('facilityName', 'Facility name is required');
+      req('facilityType', 'Select facility type');
+      req('city', 'City is required');
+      req('country', 'Country is required');
+      if (!form.trainingTracking.length) e.trainingTracking = 'Select at least one option';
+      req('painPoint', 'Select one pain point');
+      req('startTimeline', 'Select start timeline');
+    }
+    if (activeRole === 'investor') {
+      req('firmName', 'Firm/fund is required');
+      req('investorType', 'Select investor type');
+      req('checkSize', 'Select check size');
+      if (!form.thesisAlignment.length) e.thesisAlignment = 'Select at least one thesis alignment';
+      req('investorInterest', 'Select one option');
+      if (!form.ndaAccepted) e.ndaAccepted = 'NDA acknowledgement is required';
+    }
+    if (activeRole === 'product') {
+      req('company', 'Company/organisation is required');
+      req('inquiryType', 'Select inquiry type');
+      req('deploymentScale', 'Select deployment scale');
+      if (!form.integrations.length) e.integrations = 'Select at least one integration';
+      req('decisionTimeline', 'Select decision timeline');
+      req('productQuestion', 'Please enter your requirements');
+    }
+    if (activeRole === 'other') {
+      req('otherTopic', 'Select what this is about');
+      req('otherMessage', 'Message is required');
+    }
+    return e;
+  };
+
+  const submitForm = async (e) => {
+    e.preventDefault();
+    const eMap = validate();
+    setErrors(eMap);
+    if (Object.keys(eMap).length) return;
+    setSubmitting(true);
+    await new Promise((r) => setTimeout(r, 1200));
+    setSubmitting(false);
+    setSubmitted({ firstName: form.firstName || 'there', email: form.email });
+    setSent(true);
+  };
+
+  const err = (k) => errors[k] ? <div className="contact-err">{errors[k]}</div> : null;
 
   return (
     <>
@@ -1146,77 +1351,374 @@ export function ContactPage() {
         background: 'var(--bg)', paddingTop: 120, paddingBottom: 120,
         paddingLeft: 80, paddingRight: 80, transition: 'background .4s ease',
       }}>
-        <div className="pw-sp" style={{ maxWidth: 1100, margin: '0 auto', width: '100%', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, alignItems: 'start' }}>
-          {/* Left */}
-          <div>
-            <span className="tag r">Early Access</span>
-            <h1 className="r" style={{
-              fontSize: 'clamp(48px, 8vw, 100px)', fontWeight: 700,
-              lineHeight: .95, letterSpacing: '-.034em',
-              color: 'var(--txt)', transition: 'color .4s ease', transitionDelay: '.08s',
-              marginBottom: 32,
-            }}>
-              Get early<br /><span style={{ color: 'var(--a)', transition: 'color .4s ease' }}>access.</span>
-            </h1>
-            <p className="r" style={{
-              fontSize: 'clamp(15px, 1.6vw, 18px)', color: 'var(--sub)', lineHeight: 1.72,
-              fontWeight: 300, transition: 'color .4s ease', transitionDelay: '.16s',
-            }}>
-              Join the waitlist for coaches and performance facilities building the future of training. We're onboarding a select cohort now.
-            </p>
-            <div className="r" style={{ marginTop: 48, display: 'flex', flexDirection: 'column', gap: 16, transitionDelay: '.24s' }}>
-              {[['Response time', '< 48 hours'], ['Access type', 'Pilot program'], ['Cost', 'Free during beta']].map(([k, v]) => (
-                <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '14px 0', borderBottom: '1px solid var(--div)' }}>
-                  <span style={{ fontSize: 13, color: 'var(--sub)', transition: 'color .4s ease' }}>{k}</span>
-                  <span style={{ fontSize: 13, color: 'var(--a)', fontWeight: 500, transition: 'color .4s ease' }}>{v}</span>
+        <div style={{
+          position: 'absolute', inset: 0, pointerEvents: 'none',
+          background: 'radial-gradient(ellipse 70% 60% at 50% 50%, rgba(77,255,239,.018) 0%, transparent 70%)',
+        }} />
+        <div className="contact-wrap" style={{ maxWidth: 1100, margin: '0 auto', width: '100%', position: 'relative', zIndex: 1 }}>
+          <div className="contact-hero-grid">
+            <div>
+              <span className="tag r">Contact</span>
+              <h1 className="r" style={{
+                fontSize: 'clamp(56px, 10vw, 118px)', fontWeight: 700,
+                lineHeight: .95, letterSpacing: '-.034em', color: 'var(--txt)',
+                transition: 'color .4s ease', transitionDelay: '.08s',
+              }}>
+                Let's <span style={{ color: 'var(--a)' }}>Connect.</span>
+              </h1>
+              <p className="r" style={{
+                fontSize: 'clamp(16px, 1.8vw, 20px)', color: 'var(--sub)', lineHeight: 1.72,
+                maxWidth: 420, marginTop: 28, fontWeight: 300, transition: 'color .4s ease',
+                transitionDelay: '.16s',
+              }}>
+                The right form is below. Pick what fits.
+              </p>
+            </div>
+            <div className="r contact-chip-grid" style={{ transitionDelay: '.22s' }}>
+              {[['48h', 'Beta response'], ['24h', 'Investor deck'], ['1 day', 'Product reply']].map(([v, l]) => (
+                <div key={l} className="contact-chip">
+                  <div className="contact-chip-v">{v}</div>
+                  <div className="contact-chip-l">{l}</div>
                 </div>
               ))}
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* Right — form */}
-          <div className="r" style={{ transitionDelay: '.12s' }}>
-            {sent ? (
-              <div style={{
-                background: 'var(--card)', border: '1px solid var(--bd)', borderRadius: 24,
-                padding: '72px 48px', textAlign: 'center', transition: 'background .4s ease, border-color .4s ease',
-              }}>
-                <div style={{ fontSize: 48, marginBottom: 24 }}>✓</div>
-                <h3 style={{ fontSize: 24, fontWeight: 600, color: 'var(--txt)', marginBottom: 12, transition: 'color .4s ease' }}>You're on the list.</h3>
-                <p style={{ fontSize: 15, color: 'var(--sub)', lineHeight: 1.65, transition: 'color .4s ease' }}>We'll be in touch within 48 hours.</p>
+      <section className="sp" style={{
+        background: 'var(--bg2)', paddingTop: 60, paddingBottom: 60,
+        paddingLeft: 80, paddingRight: 80, transition: 'background .4s ease',
+      }}>
+        <div className="contact-wrap" style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <div className="r contact-role-grid">
+            {Object.entries(roleData).map(([id, meta]) => (
+              <button key={id} type="button" className={`contact-role-btn${activeRole === id ? ' is-active' : ''}`} onClick={() => switchRole(id)} data-h>
+                <div className="contact-role-top">
+                  <span className="contact-role-icon">{meta.icon}</span>
+                  <span className="contact-role-name">{meta.name}</span>
+                </div>
+                <p className="contact-role-desc">{meta.desc}</p>
+                <span className="contact-pill">{meta.tag}</span>
+                <span className="contact-role-line" />
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section ref={formZoneRef} className="sp" style={{
+        background: 'var(--bg)', paddingTop: 90, paddingBottom: 140,
+        paddingLeft: 80, paddingRight: 80, transition: 'background .4s ease',
+      }}>
+        <div className="contact-wrap" style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <div className="contact-form-grid">
+            <div className={`contact-form-shell ${formPhase === 'out' ? 'is-out' : 'is-in'}`}>
+              {sent ? (
+                <div className="contact-form-card">
+                  <div className="contact-ok">✓</div>
+                  <h2 style={{ fontSize: 'clamp(34px, 5vw, 56px)', fontWeight: 700, letterSpacing: '-.03em', color: 'var(--txt)', marginBottom: 12 }}>
+                    You're <span style={{ color: 'var(--a)' }}>on the list.</span>
+                  </h2>
+                  <p style={{ fontSize: 15, color: 'var(--sub)', lineHeight: 1.72, marginBottom: 14 }}>
+                    Thanks, {submitted.firstName}. We received your {activeMeta.name.toLowerCase()} inquiry.
+                  </p>
+                  <p style={{ fontSize: 13, color: 'var(--sub)', lineHeight: 1.7, marginBottom: 8 }}>{activeMeta.next}</p>
+                  <p style={{ fontSize: 13, color: 'var(--a)', marginBottom: 24 }}>A confirmation has been sent to {submitted.email}</p>
+                  <a href="/platform" onClick={goPage('/platform')} className="nl" data-h style={{ fontSize: 14 }}>Explore how Genyx works →</a>
+                </div>
+              ) : (
+                <form onSubmit={submitForm} className="contact-form-card">
+                  <div className="contact-form-title">{activeMeta.name}</div>
+
+                  <div className="contact-sec-lbl">Primary Details</div>
+                  <div className="div" />
+                  <div className="contact-grid-2">
+                    <div>
+                      <label className={`contact-lbl${errors.firstName ? ' is-err' : ''}`}>First Name</label>
+                      <input className={`fi${errors.firstName ? ' fi-err' : ''}`} value={form.firstName} onChange={upd('firstName')} data-h />
+                      {err('firstName')}
+                    </div>
+                    <div>
+                      <label className={`contact-lbl${errors.lastName ? ' is-err' : ''}`}>Last Name</label>
+                      <input className={`fi${errors.lastName ? ' fi-err' : ''}`} value={form.lastName} onChange={upd('lastName')} data-h />
+                      {err('lastName')}
+                    </div>
+                  </div>
+
+                  <div className="contact-grid-2">
+                    <div>
+                      <label className={`contact-lbl${errors.email ? ' is-err' : ''}`}>Email</label>
+                      <input className={`fi${errors.email ? ' fi-err' : ''}`} type="email" value={form.email} onChange={upd('email')} data-h />
+                      {err('email')}
+                    </div>
+                    <div>
+                      <label className={`contact-lbl${activeRole === 'beta' && errors.facilityName ? ' is-err' : ''}${activeRole === 'investor' && errors.firmName ? ' is-err' : ''}${activeRole === 'product' && errors.company ? ' is-err' : ''}`}>
+                        {activeRole === 'beta' ? 'Facility Name' : activeRole === 'investor' ? 'Firm / Fund Name' : activeRole === 'product' ? 'Company / Organisation' : 'Organisation (optional)'}
+                      </label>
+                      {activeRole === 'beta' && <input className={`fi${errors.facilityName ? ' fi-err' : ''}`} value={form.facilityName} onChange={upd('facilityName')} data-h />}
+                      {activeRole === 'investor' && <input className={`fi${errors.firmName ? ' fi-err' : ''}`} value={form.firmName} onChange={upd('firmName')} data-h />}
+                      {activeRole === 'product' && <input className={`fi${errors.company ? ' fi-err' : ''}`} value={form.company} onChange={upd('company')} data-h />}
+                      {activeRole === 'other' && <input className="fi" value={form.otherOrg} onChange={upd('otherOrg')} data-h />}
+                      {activeRole === 'beta' && err('facilityName')}
+                      {activeRole === 'investor' && err('firmName')}
+                      {activeRole === 'product' && err('company')}
+                    </div>
+                  </div>
+
+                  {activeRole === 'beta' && (
+                    <>
+                      <div className="contact-sec-lbl">Beta Fit</div>
+                      <div className="div" />
+                      <div className="contact-grid-2">
+                        <div>
+                          <label className={`contact-lbl${errors.roleTitle ? ' is-err' : ''}`}>Role / Title</label>
+                          <div className="fiw">
+                            <select className={`fi${errors.roleTitle ? ' fi-err' : ''}`} value={form.roleTitle} onChange={upd('roleTitle')} data-h>
+                              <option value="">Select</option>
+                              <option>Head Coach</option><option>S&C Coach</option><option>Gym Owner/Operator</option><option>Personal Trainer</option>
+                              <option>Athletic Director</option><option>Sports Scientist</option><option>Other</option>
+                            </select>
+                          </div>
+                          {err('roleTitle')}
+                        </div>
+                        <div>
+                          <label className={`contact-lbl${errors.facilityType ? ' is-err' : ''}`}>Facility Type</label>
+                          <div className="fiw">
+                            <select className={`fi${errors.facilityType ? ' fi-err' : ''}`} value={form.facilityType} onChange={upd('facilityType')} data-h>
+                              <option value="">Select</option>
+                              <option>Commercial Gym/Box</option><option>CrossFit/Functional Fitness</option><option>Sports Performance Facility</option><option>Professional Sports Club</option>
+                              <option>University/College Athletics</option><option>Boutique Studio</option><option>Physical Therapy/Rehab</option><option>Corporate Wellness</option>
+                            </select>
+                          </div>
+                          {err('facilityType')}
+                        </div>
+                      </div>
+                      <div className="contact-grid-2">
+                        <div>
+                          <label className={`contact-lbl${errors.city ? ' is-err' : ''}`}>City</label>
+                          <input className={`fi${errors.city ? ' fi-err' : ''}`} value={form.city} onChange={upd('city')} data-h />
+                          {err('city')}
+                        </div>
+                        <div>
+                          <label className={`contact-lbl${errors.country ? ' is-err' : ''}`}>Country</label>
+                          <input className={`fi${errors.country ? ' fi-err' : ''}`} value={form.country} onChange={upd('country')} data-h />
+                          {err('country')}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="contact-lbl">Member count range</label>
+                        <div className="contact-range-val">{memberRanges[form.memberRange]}</div>
+                        <input className="contact-range" type="range" min="0" max="4" step="1" value={form.memberRange} onChange={upd('memberRange')} data-h />
+                      </div>
+                      <div>
+                        <label className={`contact-lbl${errors.trainingTracking ? ' is-err' : ''}`}>How do you currently track training?</label>
+                        <div className={`contact-checkgrp${errors.trainingTracking ? ' is-err' : ''}`}>
+                          {['Manual rep counting', 'Whiteboard/notes', 'Wearables', 'Video review', 'Coach observation only', 'No formal tracking'].map((opt) => (
+                            <button key={opt} type="button" className="contact-opt" onClick={() => toggleMulti('trainingTracking', opt)} data-h>
+                              <span className={`contact-box${form.trainingTracking.includes(opt) ? ' is-on' : ''}`}>✓</span><span>{opt}</span>
+                            </button>
+                          ))}
+                        </div>
+                        {err('trainingTracking')}
+                      </div>
+                      <div>
+                        <label className={`contact-lbl${errors.painPoint ? ' is-err' : ''}`}>Biggest pain point</label>
+                        <div className={`contact-radiogrp${errors.painPoint ? ' is-err' : ''}`}>
+                          {['No visibility into movement quality', "Can't track fatigue/form breakdown", 'Hard to scale coaching', 'Athletes progressing slowly without data', 'Injury risk with no early warning'].map((opt) => (
+                            <button key={opt} type="button" className="contact-opt" onClick={() => setRadio('painPoint', opt)} data-h>
+                              <span className={`contact-dot${form.painPoint === opt ? ' is-on' : ''}`} /><span>{opt}</span>
+                            </button>
+                          ))}
+                        </div>
+                        {err('painPoint')}
+                      </div>
+                      <div>
+                        <label className={`contact-lbl${errors.startTimeline ? ' is-err' : ''}`}>Start timeline</label>
+                        <div className="fiw">
+                          <select className={`fi${errors.startTimeline ? ' fi-err' : ''}`} value={form.startTimeline} onChange={upd('startTimeline')} data-h>
+                            <option value="">Select</option><option>Immediately</option><option>Within 1 month</option><option>1-3 months</option><option>3-6 months</option><option>Exploring</option>
+                          </select>
+                        </div>
+                        {err('startTimeline')}
+                      </div>
+                      <div>
+                        <label className="contact-lbl">Anything else we should know?</label>
+                        <textarea className="fi" rows={4} value={form.betaNotes} onChange={upd('betaNotes')} data-h />
+                      </div>
+                    </>
+                  )}
+
+                  {activeRole === 'investor' && (
+                    <>
+                      <div className="contact-sec-lbl">Investor Profile</div>
+                      <div className="div" />
+                      <div className="contact-grid-2">
+                        <div>
+                          <label className={`contact-lbl${errors.investorType ? ' is-err' : ''}`}>Investor type</label>
+                          <div className="fiw">
+                            <select className={`fi${errors.investorType ? ' fi-err' : ''}`} value={form.investorType} onChange={upd('investorType')} data-h>
+                              <option value="">Select</option><option>Angel</option><option>Seed/Micro-VC</option><option>Series A+ VC</option><option>Family Office</option><option>Corporate/Strategic</option><option>Sports & Fitness Fund</option><option>Deep Tech Fund</option>
+                            </select>
+                          </div>
+                          {err('investorType')}
+                        </div>
+                        <div>
+                          <label className={`contact-lbl${errors.checkSize ? ' is-err' : ''}`}>Typical check size</label>
+                          <div className="fiw">
+                            <select className={`fi${errors.checkSize ? ' fi-err' : ''}`} value={form.checkSize} onChange={upd('checkSize')} data-h>
+                              <option value="">Select</option><option>$25K-$100K</option><option>$100K-$250K</option><option>$250K-$500K</option><option>$500K-$1M</option><option>$1M-$2M</option><option>$2M-$5M</option><option>$5M+</option>
+                            </select>
+                          </div>
+                          {err('checkSize')}
+                        </div>
+                      </div>
+                      <div>
+                        <label className={`contact-lbl${errors.thesisAlignment ? ' is-err' : ''}`}>Investment thesis alignment</label>
+                        <div className={`contact-checkgrp${errors.thesisAlignment ? ' is-err' : ''}`}>
+                          {['Sports & Performance Tech', 'AI/Computer Vision', 'SaaS/Recurring Revenue', 'Consumer Health & Wellness', 'Enterprise B2B', 'Hardware + Software Platforms'].map((opt) => (
+                            <button key={opt} type="button" className="contact-opt" onClick={() => toggleMulti('thesisAlignment', opt)} data-h>
+                              <span className={`contact-box${form.thesisAlignment.includes(opt) ? ' is-on' : ''}`}>✓</span><span>{opt}</span>
+                            </button>
+                          ))}
+                        </div>
+                        {err('thesisAlignment')}
+                      </div>
+                      <div>
+                        <label className={`contact-lbl${errors.investorInterest ? ' is-err' : ''}`}>What interests you most about Genyx?</label>
+                        <div className={`contact-radiogrp${errors.investorInterest ? ' is-err' : ''}`}>
+                          {['Camera-only AI differentiation', 'Market size', 'Enterprise scalability', 'Team & execution', 'Post-workout analytics IP'].map((opt) => (
+                            <button key={opt} type="button" className="contact-opt" onClick={() => setRadio('investorInterest', opt)} data-h>
+                              <span className={`contact-dot${form.investorInterest === opt ? ' is-on' : ''}`} /><span>{opt}</span>
+                            </button>
+                          ))}
+                        </div>
+                        {err('investorInterest')}
+                      </div>
+                      <div>
+                        <label className="contact-lbl">Additional context or questions</label>
+                        <textarea className="fi" rows={4} value={form.investorNotes} onChange={upd('investorNotes')} data-h />
+                      </div>
+                      <button type="button" className="contact-checkline" onClick={() => setForm((f) => ({ ...f, ndaAccepted: !f.ndaAccepted }))} data-h>
+                        <span className={`contact-box${form.ndaAccepted ? ' is-on' : ''}`}>✓</span>
+                        <span>I understand a standard NDA is required for full data room access</span>
+                      </button>
+                      {err('ndaAccepted')}
+                    </>
+                  )}
+
+                  {activeRole === 'product' && (
+                    <>
+                      <div className="contact-sec-lbl">Product Context</div>
+                      <div className="div" />
+                      <div className="contact-grid-2">
+                        <div>
+                          <label className={`contact-lbl${errors.inquiryType ? ' is-err' : ''}`}>Inquiry type</label>
+                          <div className="fiw">
+                            <select className={`fi${errors.inquiryType ? ' fi-err' : ''}`} value={form.inquiryType} onChange={upd('inquiryType')} data-h>
+                              <option value="">Select</option><option>Pricing & Plans</option><option>Technical Specs</option><option>Demo Request</option><option>Enterprise Deployment</option><option>API/Integration</option><option>Multi-Location Rollout</option><option>Hardware Requirements</option>
+                            </select>
+                          </div>
+                          {err('inquiryType')}
+                        </div>
+                        <div>
+                          <label className={`contact-lbl${errors.deploymentScale ? ' is-err' : ''}`}>Deployment scale</label>
+                          <div className="fiw">
+                            <select className={`fi${errors.deploymentScale ? ' fi-err' : ''}`} value={form.deploymentScale} onChange={upd('deploymentScale')} data-h>
+                              <option value="">Select</option><option>Single location</option><option>2-5 locations</option><option>6-10 locations</option><option>11-20 locations</option><option>20+ locations/enterprise</option>
+                            </select>
+                          </div>
+                          {err('deploymentScale')}
+                        </div>
+                      </div>
+                      <div>
+                        <label className={`contact-lbl${errors.integrations ? ' is-err' : ''}`}>Integrations you need</label>
+                        <div className={`contact-checkgrp${errors.integrations ? ' is-err' : ''}`}>
+                          {['Gym management software', 'Existing CRM/member app', 'Performance tracking database', 'Coaching platform/LMS', 'Custom API', 'No specific integrations'].map((opt) => (
+                            <button key={opt} type="button" className="contact-opt" onClick={() => toggleMulti('integrations', opt)} data-h>
+                              <span className={`contact-box${form.integrations.includes(opt) ? ' is-on' : ''}`}>✓</span><span>{opt}</span>
+                            </button>
+                          ))}
+                        </div>
+                        {err('integrations')}
+                      </div>
+                      <div>
+                        <label className={`contact-lbl${errors.decisionTimeline ? ' is-err' : ''}`}>Decision timeline</label>
+                        <div className="fiw">
+                          <select className={`fi${errors.decisionTimeline ? ' fi-err' : ''}`} value={form.decisionTimeline} onChange={upd('decisionTimeline')} data-h>
+                            <option value="">Select</option><option>ASAP</option><option>Within 1 month</option><option>1-3 months</option><option>3-6 months</option><option>Just researching</option>
+                          </select>
+                        </div>
+                        {err('decisionTimeline')}
+                      </div>
+                      <div>
+                        <label className={`contact-lbl${errors.productQuestion ? ' is-err' : ''}`}>Your question or requirements</label>
+                        <textarea className={`fi${errors.productQuestion ? ' fi-err' : ''}`} rows={6} style={{ minHeight: 120 }} value={form.productQuestion} onChange={upd('productQuestion')} data-h />
+                        {err('productQuestion')}
+                      </div>
+                    </>
+                  )}
+
+                  {activeRole === 'other' && (
+                    <>
+                      <div className="contact-sec-lbl">Request Type</div>
+                      <div className="div" />
+                      <div>
+                        <label className={`contact-lbl${errors.otherTopic ? ' is-err' : ''}`}>What's this about?</label>
+                        <div className={`contact-radiogrp${errors.otherTopic ? ' is-err' : ''}`}>
+                          {['Press/Media', 'Academic/Research', 'Strategic Partnership', 'Speaking/Event', 'Supplier or Vendor', 'Something Else'].map((opt) => (
+                            <button key={opt} type="button" className="contact-opt" onClick={() => setRadio('otherTopic', opt)} data-h>
+                              <span className={`contact-dot${form.otherTopic === opt ? ' is-on' : ''}`} /><span>{opt}</span>
+                            </button>
+                          ))}
+                        </div>
+                        {err('otherTopic')}
+                      </div>
+                      <div>
+                        <label className={`contact-lbl${errors.otherMessage ? ' is-err' : ''}`}>Your message</label>
+                        <textarea className={`fi${errors.otherMessage ? ' fi-err' : ''}`} rows={7} style={{ minHeight: 140 }} value={form.otherMessage} onChange={upd('otherMessage')} data-h />
+                        {err('otherMessage')}
+                      </div>
+                    </>
+                  )}
+
+                  <button type="submit" className="cp contact-submit" disabled={submitting} data-h>
+                    <span>{submitting ? 'Submitting...' : 'Submit Inquiry →'}</span>
+                  </button>
+                </form>
+              )}
+            </div>
+
+            <aside className="contact-info">
+              <div className="contact-info-hi">
+                <h3>{activeMeta.name}</h3>
+                <p>{activeMeta.purpose}</p>
+                <div className="contact-info-list">
+                  {activeMeta.checklist.map((item) => <div key={item}>• {item}</div>)}
+                </div>
               </div>
-            ) : (
-              <form onSubmit={e => { e.preventDefault(); setSent(true); }} style={{
-                background: 'var(--card)', border: '1px solid var(--bd)', borderRadius: 24,
-                padding: '48px 40px', display: 'flex', flexDirection: 'column', gap: 16,
-                transition: 'background .4s ease, border-color .4s ease',
-              }}>
-                <div>
-                  <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8, transition: 'color .4s ease' }}>Your Name</div>
-                  <input className="fi" type="text" placeholder="Full name" value={form.name} onChange={upd('name')} required />
+              <div className="contact-info-card">
+                <div className="contact-meta">
+                  <div>
+                    <div className="contact-info-k">Response</div>
+                    <div className="contact-info-v">{activeMeta.response}</div>
+                  </div>
+                  <div>
+                    <div className="contact-info-k">Location</div>
+                    <div style={{ color: 'var(--txt)', fontSize: 14, fontWeight: 500 }}>India</div>
+                    <div style={{ color: 'var(--sub)', fontSize: 12, marginTop: 4 }}>IST timezone · Remote-first</div>
+                  </div>
                 </div>
-                <div>
-                  <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8, transition: 'color .4s ease' }}>Email Address</div>
-                  <input className="fi" type="email" placeholder="you@yourgym.com" value={form.email} onChange={upd('email')} required />
+                <div className="div" style={{ margin: '14px 0' }} />
+                <div className="contact-info-k">Quick Links</div>
+                <div className="contact-linklist">
+                  <a href="/platform" onClick={goPage('/platform')} className="nl" data-h>→ How It Works</a>
+                  <a href="/platform" onClick={goPage('/platform')} className="nl" data-h>→ Platform</a>
+                  <a href="/analytics" onClick={goPage('/analytics')} className="nl" data-h>→ Analytics</a>
+                  <a href="/about" onClick={goPage('/about')} className="nl" data-h>→ About</a>
                 </div>
-                <div>
-                  <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8, transition: 'color .4s ease' }}>Gym / Facility Name</div>
-                  <input className="fi" type="text" placeholder="Your gym or facility" value={form.facility} onChange={upd('facility')} />
-                </div>
-                <div>
-                  <div style={{ fontSize: 10, color: 'var(--sub)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8, transition: 'color .4s ease' }}>Message (optional)</div>
-                  <textarea className="fi" placeholder="Tell us about your training setup…" rows={4} value={form.message} onChange={upd('message')} />
-                </div>
-                <button type="submit" className="cp" style={{
-                  marginTop: 8, background: 'var(--at)', border: '1px solid var(--a)',
-                  borderRadius: 12, padding: '16px 32px',
-                  color: 'var(--a)', fontSize: 13, fontWeight: 500, letterSpacing: '.06em',
-                  transition: 'color .38s ease, border-color .4s ease, background .4s ease',
-                }}>
-                  <span>Request Early Access →</span>
-                </button>
-              </form>
-            )}
+              </div>
+            </aside>
           </div>
         </div>
       </section>

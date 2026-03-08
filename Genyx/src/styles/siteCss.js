@@ -226,6 +226,77 @@ a, button { cursor: none; text-decoration: none; }
 .team-card:hover { border-color: rgba(77,255,239,.2); transform: translateY(-4px); }
 .team-img { width: 100%; aspect-ratio: 4/5; object-fit: cover; display: block; filter: grayscale(.14) contrast(1.05); }
 
+/* ── Contact Page ── */
+.contact-wrap { width: 100%; }
+.contact-hero-grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: 22px; align-items: end; }
+.contact-chip-grid { display: grid; gap: 8px; justify-self: end; width: min(330px, 100%); }
+.contact-chip { background: var(--card); border: 1px solid var(--bd); border-radius: 12px; padding: 12px 14px; transition: background .4s ease, border-color .4s ease; }
+.contact-chip-v { color: var(--a); font-size: 20px; font-weight: 700; letter-spacing: -.02em; line-height: 1; margin-bottom: 5px; }
+.contact-chip-l { color: var(--sub); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }
+
+.contact-role-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; background: var(--div); border-radius: 14px; overflow: hidden; }
+.contact-role-btn { position: relative; background: var(--card); border: none; text-align: left; padding: 18px; transition: background .4s ease; }
+.contact-role-btn:hover { background: var(--bg3); }
+.contact-role-top { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.contact-role-icon { color: var(--a); font-size: 16px; line-height: 1; }
+.contact-role-name { color: var(--txt); font-size: 14px; font-weight: 600; letter-spacing: -.01em; }
+.contact-role-desc {
+  color: var(--sub); font-size: 12px; line-height: 1.55; margin-bottom: 14px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.contact-pill { display: inline-block; border: 1px solid var(--bd); border-radius: 999px; color: var(--sub); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; padding: 4px 9px; }
+.contact-role-line { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--a); transform: scaleX(0); transform-origin: left; transition: transform .44s cubic-bezier(.4,0,.2,1); }
+.contact-role-btn.is-active .contact-role-line { transform: scaleX(1); }
+
+.contact-form-grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: 14px; align-items: start; }
+.contact-form-shell { transition: opacity .85s cubic-bezier(.4,0,.2,1), transform .85s cubic-bezier(.4,0,.2,1); }
+.contact-form-shell.is-out { opacity: 0; transform: translateY(12px); pointer-events: none; }
+.contact-form-shell.is-in { opacity: 1; transform: translateY(0); }
+.contact-form-card { background: var(--card); border: 1px solid var(--bd); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 12px; transition: background .4s ease, border-color .4s ease; }
+.contact-form-title { color: var(--a); font-size: clamp(30px, 4.2vw, 50px); font-weight: 700; letter-spacing: -.03em; line-height: .95; text-transform: uppercase; }
+.contact-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.contact-lbl { display: block; color: var(--sub); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; margin-bottom: 8px; transition: color .25s ease; }
+.contact-lbl.is-err { color: #ef4444; }
+.contact-lbl:has(+ .fi:focus), .contact-lbl:has(+ .fiw .fi:focus) { color: var(--a); }
+.fi-err { border-color: #ef4444!important; }
+.contact-err { color: #ef4444; font-size: 11px; margin-top: 6px; line-height: 1.5; }
+.contact-sec-lbl { color: var(--dim); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; margin-top: 8px; }
+.contact-submit { margin-top: 8px; background: var(--at); border: 1px solid var(--a); border-radius: 10px; padding: 14px 26px; color: var(--a); font-size: 12px; font-weight: 500; letter-spacing: .08em; }
+.contact-submit:disabled { opacity: .6; }
+.contact-ok { width: 62px; height: 62px; border: 1px solid var(--a); border-radius: 12px; display: grid; place-items: center; color: var(--a); font-size: 30px; margin-bottom: 20px; animation: pulse 1.6s ease-in-out infinite; }
+
+.fiw { position: relative; }
+.fiw::after { content: '⌄'; position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--sub); pointer-events: none; font-size: 14px; }
+.fiw .fi { padding-right: 42px; }
+
+.contact-radiogrp, .contact-checkgrp { border: 1px solid var(--bd); border-radius: 10px; padding: 0 10px; background: transparent; }
+.contact-radiogrp.is-err, .contact-checkgrp.is-err { border-color: #ef4444; }
+.contact-opt { width: 100%; border: none; background: transparent; color: var(--txt); display: flex; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--div); font-size: 13px; line-height: 1.55; text-align: left; }
+.contact-opt:last-child { border-bottom: none; }
+.contact-dot { width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--dim); flex: none; position: relative; }
+.contact-dot.is-on { border-color: var(--a); }
+.contact-dot.is-on::after { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--a); position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+.contact-box { width: 14px; height: 14px; border-radius: 3px; border: 1px solid var(--dim); flex: none; display: grid; place-items: center; color: transparent; font-size: 10px; line-height: 1; }
+.contact-box.is-on { background: var(--a); border-color: var(--a); color: #0a0a0a; font-weight: 700; }
+.contact-checkline { border: none; background: transparent; color: var(--sub); font-size: 13px; line-height: 1.6; display: flex; align-items: flex-start; gap: 10px; text-align: left; }
+
+.contact-range-val { color: var(--a); font-size: clamp(24px, 3vw, 34px); font-weight: 700; letter-spacing: -.02em; margin-bottom: 8px; }
+.contact-range { width: 100%; appearance: none; height: 6px; border-radius: 999px; background: var(--bg3); border: 1px solid var(--bd); }
+.contact-range::-webkit-slider-thumb { appearance: none; width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--a); background: var(--bg); cursor: none; }
+.contact-range::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--a); background: var(--bg); cursor: none; }
+
+.contact-info { display: flex; flex-direction: column; gap: 10px; position: sticky; top: 84px; }
+.contact-info-hi { background: var(--card); border: 1px solid var(--bd); border-radius: 16px; padding: 16px; transition: background .4s ease, border-color .4s ease; }
+.contact-info-hi h3 { color: var(--txt); font-size: 16px; margin-bottom: 8px; }
+.contact-info-hi p { color: var(--sub); font-size: 12px; line-height: 1.6; margin-bottom: 10px; }
+.contact-info-list { color: var(--txt); font-size: 12px; display: grid; gap: 5px; }
+.contact-info-card { background: var(--card); border: 1px solid var(--bd); border-radius: 16px; padding: 16px; transition: border-color .3s ease, background .4s ease; }
+.contact-info-k { color: var(--sub); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; margin-bottom: 8px; }
+.contact-info-v { color: var(--a); font-size: 24px; font-weight: 700; letter-spacing: -.02em; }
+.contact-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.contact-linklist { display: grid; gap: 6px; }
+.contact-info-card .nl { display: block; margin-top: 0; font-size: 12px; }
+
 /* ─── Responsive ─────────────────────────────────────────────────── */
 @media (max-width:1024px) {
   .g2 { grid-template-columns:1fr!important; }
@@ -276,6 +347,9 @@ a, button { cursor: none; text-decoration: none; }
   /* Problem: hide giant stat number on tiny screens */
   .stat-num { font-size:clamp(72px,18vw,120px)!important; }
   .prob-g { gap:16px!important; }
+  .contact-role-grid { grid-template-columns:1fr 1fr!important; }
+  .contact-role-btn { padding:18px!important; }
+  .contact-form-card { padding:20px!important; }
 }
 
 /* ── Form input ── */
