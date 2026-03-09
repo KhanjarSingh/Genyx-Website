@@ -1597,7 +1597,7 @@ export function ContactPage() {
         if (Object.keys(eMap).length) return;
         setSubmitting(true);
         try {
-            const res = await fetch('https://genyx-backend.onrender.com/api/contact', {
+            const res = await fetch('http://localhost:3001/api/contact', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ role: activeRole, form }),

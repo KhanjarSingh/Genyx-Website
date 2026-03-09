@@ -2,11 +2,14 @@ import express from 'express';
 import cors from 'cors';
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
+import { PrismaClient } from '@prisma/client';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+const prisma = new PrismaClient();
 
 app.use(cors());
 app.use(express.json());
@@ -118,6 +121,24 @@ app.post('/api/contact', async (req, res) => {
   };
 
   try {
+    // 1. Try to save to Database (may fail if MySQL is not configured)
+    let submissionId = null;
+    try {
+      const submission = await prisma.contactSubmission.create({
+        data: {
+          role,
+          firstName: form.firstName,
+          lastName: form.lastName || null,
+          email: form.email,
+          formData: form,
+        }
+      });
+      submissionId = submission.id;
+    } catch (dbErr) {
+      console.warn('DB Save Skipped (MySQL not configured yet):', dbErr.message);
+    }
+
+    // 2. Send Email
     await transporter.sendMail({
       from: `"Genyx Contact Form" <${process.env.SMTP_USER}>`,
       to: process.env.RECIPIENT_EMAIL,
@@ -126,10 +147,29 @@ app.post('/api/contact', async (req, res) => {
       html: buildEmailHtml(role, form),
     });
 
-    res.json({ success: true, message: 'Email sent successfully' });
+    // 3. Mark email as sent (if DB save succeeded)
+    if (submissionId) {
+      await prisma.contactSubmission.update({
+        where: { id: submissionId },
+        data: { emailSent: true }
+      }).catch(e => console.warn('Failed to update email status in DB'));
+    }
+
+    res.json({ success: true, message: 'Submission processed successfully' });
   } catch (err) {
-    console.error('Email send error:', err);
-    res.status(500).json({ error: 'Failed to send email. Please try again later.' });
+    console.error('Submission processing error:', err);
+    res.status(500).json({ error: 'Failed to process submission. Please try again later.' });
+  }
+});
+
+app.get('/api/submissions', async (req, res) => {
+  try {
+    const submissions = await prisma.contactSubmission.findMany({
+      orderBy: { createdAt: 'desc' }
+    });
+    res.json(submissions);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch submissions' });
   }
 });
 
