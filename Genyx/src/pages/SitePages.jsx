@@ -766,22 +766,22 @@ function AppPreview() {
             </div>
 
             {/* Handset preview - live screen fitted into in-hand phone */}
-<div className="app-hand-zone">
-    <div className="app-hand-glow" />
-    <div className="app-hand-wrap r" style={{ transitionDelay: '.16s' }}>
-        <img src={mobileHandImg} alt="Athlete holding Genyx live training intelligence mobile view" className="app-hand-img" />
-        <div className="app-live-screen">
-            <video
-                src={DEMO_VIDEO}
-                autoPlay
-                muted
-                loop
-                playsInline
-                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-            />
-        </div>
-    </div>
-</div>
+            <div className="app-hand-zone">
+                <div className="app-hand-glow" />
+                <div className="app-hand-wrap r" style={{ transitionDelay: '.16s' }}>
+                    <img src={mobileHandImg} alt="Athlete holding Genyx live training intelligence mobile view" className="app-hand-img" />
+                    <div className="app-live-screen">
+                        <video
+                            src={DEMO_VIDEO}
+                            autoPlay
+                            muted
+                            loop
+                            playsInline
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                        />
+                    </div>
+                </div>
+            </div>
 
             {/* CTA */}
             <div className="sp r" style={{
@@ -964,12 +964,12 @@ function TeamSection() {
             img: shashankMitalImg,
             linkedin: 'https://www.linkedin.com/in/shashank-m-b9b20123/',
         },
-    {
-      name: 'Aarav Mehta',
-      title: 'Computer Vision Tech Lead',
-      bio: "IIT Bombay dual-degree (MSc Mech Eng + AI/DS). Published NLP & CV research (AMIA'23, SMM4H benchmark) and shipped computer-vision security at Reliance Jio. Passionate about turning state-of-the-art models into snappy mobile experiences.",
-      img: '',
-    },
+        {
+            name: 'Aarav Mehta',
+            title: 'Computer Vision Tech Lead',
+            bio: "IIT Bombay dual-degree (MSc Mech Eng + AI/DS). Published NLP & CV research (AMIA'23, SMM4H benchmark) and shipped computer-vision security at Reliance Jio. Passionate about turning state-of-the-art models into snappy mobile experiences.",
+            img: '',
+        },
     ];
     return (
         <section className="sp sec" style={{
@@ -1597,7 +1597,8 @@ export function ContactPage() {
         if (Object.keys(eMap).length) return;
         setSubmitting(true);
         try {
-            const res = await fetch('http://localhost:3001/api/contact', {
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+            const res = await fetch(`${apiUrl}/api/contact`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ role: activeRole, form }),
