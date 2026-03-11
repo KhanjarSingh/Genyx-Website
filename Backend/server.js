@@ -139,13 +139,19 @@ app.post('/api/contact', async (req, res) => {
     }
 
     // 2. Send Email
-    await transporter.sendMail({
-      from: `"Genyx Contact Form" <${process.env.SMTP_USER}>`,
-      to: process.env.RECIPIENT_EMAIL,
-      replyTo: form.email,
-      subject: `${roleTitles[role] || 'Contact'} — ${form.firstName} ${form.lastName || ''}`.trim(),
-      html: buildEmailHtml(role, form),
-    });
+    try {
+      await transporter.sendMail({
+        from: `"Genyx Contact Form" <${process.env.SMTP_USER}>`,
+        to: process.env.RECIPIENT_EMAIL,
+        replyTo: form.email,
+        subject: `${roleTitles[role] || 'Contact'} — ${form.firstName} ${form.lastName || ''}`.trim(),
+        html: buildEmailHtml(role, form),
+      });
+      console.log('✅ Email successfully dispatched to SMTP server');
+    } catch (emailErr) {
+      console.error('❌ STMP Send Error:', emailErr);
+      throw emailErr; // Rethrow to send 500 status to frontend
+    }
 
     // 3. Mark email as sent (if DB save succeeded)
     if (submissionId) {
@@ -157,7 +163,7 @@ app.post('/api/contact', async (req, res) => {
 
     res.json({ success: true, message: 'Submission processed successfully' });
   } catch (err) {
-    console.error('Submission processing error:', err);
+    console.error('Submission processing error:', err.message);
     res.status(500).json({ error: 'Failed to process submission. Please try again later.' });
   }
 });
