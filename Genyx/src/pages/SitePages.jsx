@@ -2698,7 +2698,7 @@ export function CareersPage() {
                                     <div className="div" />
                                     <div>
                                         <div className="contact-radiogrp">
-                                            {['Fully Remote', 'Hybrid (City based)', 'On site (Pune)', 'Open to anything'].map((opt) => (
+                                            {['Fully Remote', 'Hybrid (City based)', 'On site (Gurugram)', 'Open to anything'].map((opt) => (
                                                 <button key={opt} type="button" className="contact-opt" onClick={() => setRadio('preferredWork', opt)} data-h style={{ textAlign: 'left' }}>
                                                     <span className={`contact-dot${form.preferredWork === opt ? ' is-on' : ''}`} style={{ flexShrink: 0 }} /><span>{opt}</span>
                                                 </button>
