@@ -50,6 +50,7 @@ export function Nav({ theme, toggleTheme, page, setPage }) {
     { label: 'Analytics', pg: 'analytics' },
     { label: 'About', pg: 'about' },
     { label: 'Contact', pg: 'contact' },
+    { label: 'Careers', pg: 'careers' },
   ];
 
   const go = (pg) => { setPage(pg); setOpen(false); };

@@ -967,7 +967,7 @@ function TeamSection() {
         {
             name: 'Aarav Mehta',
             title: 'Computer Vision Tech Lead',
-            bio: "IIT Bombay dual-degree (MSc Mech Eng + AI/DS). Published NLP & CV research (AMIA'23, SMM4H benchmark) and shipped computer-vision security at Reliance Jio. Passionate about turning state-of-the-art models into snappy mobile experiences.",
+            bio: 'Dual degree in Computer Science and Artificial Intelligence from IIT Delhi. Published computer vision and NLP researcher, with work recognised at AMIA 2023 and the SMM4H benchmark. Shipped production grade, real time computer vision infrastructure at one of India\'s largest technology organisations. Core expertise at the intersection of edge inference, biomechanics modelling, and deploying research-grade AI under real-world operational constraints.',
             img: '',
         },
     ];
@@ -1607,6 +1607,7 @@ export function ContactPage() {
             if (!res.ok) throw new Error(data.error || 'Something went wrong');
             setSubmitted({ firstName: form.firstName || 'there', email: form.email });
             setSent(true);
+            setTimeout(() => formZoneRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
         } catch (err) {
             setErrors({ submit: err.message || 'Failed to send. Please try again.' });
         } finally {
@@ -2315,8 +2316,483 @@ export function HomePage() {
             <Problem />
             <LiveDash />
             <PostWorkout />
-            <HowItWorks />
             <AppPreview />
+            <Footer />
+        </>
+    );
+}
+
+export function CareersPage() {
+    useReveal();
+    const roleData = {
+        engineering: {
+            icon: '⚙️',
+            name: 'Engineering',
+            desc: 'Build the low-latency core, real-time vision pipelines, and scalable backend platforms.',
+            tag: 'Open Roles',
+        },
+        ai: {
+            icon: '🧠',
+            name: 'AI & Research',
+            desc: 'Develop the computer vision models that extract biomechanical signals in under 200ms.',
+            tag: 'Open Roles',
+        },
+        product_design: {
+            icon: '📐',
+            name: 'Product & Design',
+            desc: 'Shape the interface that delivers intelligence seamlessly to athletes and coaches.',
+            tag: 'Open Roles',
+        },
+        gtm: {
+            icon: '⚡',
+            name: 'Go-To-Market & Ops',
+            desc: 'Scale the deployment of Genyx Pods to premium facilities globally.',
+            tag: 'Open Roles',
+        },
+    };
+
+    const [activeRole, setActiveRole] = useState('engineering');
+    const [formPhase, setFormPhase] = useState('in');
+    const [submitting, setSubmitting] = useState(false);
+    const [sent, setSent] = useState(false);
+    const [submitted, setSubmitted] = useState({ firstName: '', email: '' });
+    const [errors, setErrors] = useState({});
+
+    const [form, setForm] = useState({
+        firstName: '', lastName: '', email: '', phone: '',
+        roleApplyingFor: '', department: '', experience: '', currentRole: '', currentCompany: '',
+        linkedin: '', portfolio: '', resumeLink: '',
+        whyGenyx: [], biggestStrength: '', preferredWork: '', availability: '', hearAboutUs: '',
+        whyShouldWeWorkTogether: '',
+    });
+
+    const switchTimeoutRef = useRef(null);
+    const formZoneRef = useRef(null);
+    const activeMeta = roleData[activeRole];
+
+    useEffect(() => () => {
+        if (switchTimeoutRef.current) clearTimeout(switchTimeoutRef.current);
+    }, []);
+
+    const upd = (k) => (e) => {
+        const v = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+        setForm((f) => ({ ...f, [k]: v }));
+        setErrors((prev) => ({ ...prev, [k]: '' }));
+    };
+
+    const toggleMulti = (k, option) => {
+        setForm((f) => {
+            const arr = Array.isArray(f[k]) ? f[k] : [];
+            const next = arr.includes(option) ? arr.filter((x) => x !== option) : [...arr, option];
+            return { ...f, [k]: next };
+        });
+        setErrors((prev) => ({ ...prev, [k]: '' }));
+    };
+
+    const setRadio = (k, option) => {
+        setForm((f) => ({ ...f, [k]: option }));
+        setErrors((prev) => ({ ...prev, [k]: '' }));
+    };
+
+    const switchRole = (next) => {
+        if (next === activeRole) return;
+        setSent(false);
+        setErrors({});
+        setSubmitting(false);
+        setFormPhase('out');
+        if (switchTimeoutRef.current) clearTimeout(switchTimeoutRef.current);
+        switchTimeoutRef.current = setTimeout(() => {
+            setActiveRole(next);
+            setFormPhase('in');
+            formZoneRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 50);
+    };
+
+    const validate = () => {
+        const e = {};
+        const req = (k, m) => { if (!String(form[k] || '').trim()) e[k] = m; };
+        req('firstName', 'First name is required');
+        req('lastName', 'Last name is required');
+        req('email', 'Email is required');
+        if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = 'Enter a valid email address';
+
+        req('roleApplyingFor', 'Please select a role');
+        req('experience', 'Please select your experience level');
+        req('resumeLink', 'Please provide a resume link');
+        req('availability', 'Please select when you are available to start');
+
+        return e;
+    };
+
+    const submitForm = async (e) => {
+        e.preventDefault();
+        const eMap = validate();
+        setErrors(eMap);
+        if (Object.keys(eMap).length) {
+            formZoneRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            return;
+        }
+        setSubmitting(true);
+        try {
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+            const res = await fetch(`${apiUrl}/api/careers`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ role: activeRole, form }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Something went wrong');
+            setSubmitted({ firstName: form.firstName || 'there', email: form.email });
+            setSent(true);
+            setTimeout(() => formZoneRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
+        } catch (err) {
+            setErrors({ submit: err.message || 'Failed to send. Please try again.' });
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const err = (k) => errors[k] ? <div className="contact-err">{errors[k]}</div> : null;
+
+    return (
+        <>
+            {/* HERO SECTION */}
+            <section className="sp" style={{
+                minHeight: '80vh', display: 'flex', alignItems: 'center',
+                background: 'var(--bg)', paddingTop: 140, paddingBottom: 120,
+                paddingLeft: 80, paddingRight: 80, transition: 'background .4s ease',
+            }}>
+                <div style={{
+                    position: 'absolute', inset: 0, pointerEvents: 'none',
+                    background: 'radial-gradient(ellipse 70% 60% at 50% 50%, rgba(77,255,239,.018) 0%, transparent 70%)',
+                }} />
+                <div className="contact-wrap" style={{ maxWidth: 1100, margin: '0 auto', width: '100%', position: 'relative', zIndex: 1 }}>
+                    <div>
+                        <span className="tag r" style={{ color: 'var(--a)' }}>CAREERS</span>
+                        <h1 className="r" style={{
+                            fontSize: 'clamp(56px, 10vw, 118px)', fontWeight: 700,
+                            lineHeight: .95, letterSpacing: '-.034em', color: 'var(--txt)',
+                            transition: 'color .4s ease', transitionDelay: '.08s',
+                        }}>
+                            Build the <span style={{ color: 'var(--a)' }}>Future</span><br />of Movement Intelligence
+                        </h1>
+                        <p className="r" style={{
+                            fontSize: 'clamp(16px, 1.8vw, 20px)', color: 'var(--sub)', lineHeight: 1.72,
+                            maxWidth: 580, marginTop: 28, fontWeight: 300, transition: 'color .4s ease',
+                            transitionDelay: '.16s',
+                        }}>
+                            Join a passionate team redefining how coaches, athletes, and facilities understand human movement through AI powered real time analysis.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            {/* WHY JOIN US GRID */}
+            <section className="sp" style={{
+                background: 'var(--bg2)', paddingTop: 100, paddingBottom: 100,
+                paddingLeft: 80, paddingRight: 80, transition: 'background .4s ease',
+            }}>
+                <div className="contact-wrap" style={{ maxWidth: 1100, margin: '0 auto' }}>
+                    <h2 className="r" style={{ fontSize: 'clamp(44px, 7vw, 80px)', fontWeight: 700, letterSpacing: '-.028em', lineHeight: .98, marginBottom: 56, color: 'var(--a)', transition: 'color .4s ease', transitionDelay: '.08s', textTransform: 'uppercase' }}>
+                        Why Join Us
+                    </h2>
+                    <div className="r" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2px', background: 'var(--div)', borderRadius: 20, overflow: 'hidden', transitionDelay: '.15s' }}>
+                        {[
+                            ['Early Stage Impact', 'Shape the product, culture, and direction from the ground up.'],
+                            ['Remote First', 'Work from anywhere in India. Async friendly, IST timezone.'],
+                            ['Cutting Edge Tech', 'Work with computer vision, real time ML, and pose estimation.'],
+                            ['Sports & Fitness Domain', 'Not another SaaS tool. We work with real athletes and coaches.'],
+                            ['Equity & Growth', 'Early stage equity, fast career growth, direct founder access.'],
+                            ['Learning Budget', 'Conference sponsorships, courses, and continuous upskilling.'],
+                        ].map(([title, desc], i) => (
+                            <div key={i} style={{ background: 'var(--card)', padding: '40px 36px', transition: 'background .4s ease, transform .2s ease' }}>
+                                <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 12, color: 'var(--txt)' }}>{title}</div>
+                                <p style={{ fontSize: 14, color: 'var(--sub)', lineHeight: 1.72, fontWeight: 300 }}>{desc}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+
+
+            {/* HIRING PROCESS */}
+            <section className="sp" style={{
+                background: 'var(--bg2)', paddingTop: 100, paddingBottom: 100,
+                paddingLeft: 80, paddingRight: 80, transition: 'background .4s ease',
+            }}>
+                <div className="contact-wrap" style={{ maxWidth: 1100, margin: '0 auto' }}>
+                    <span className="tag r">OUR HIRING PROCESS</span>
+                    <h2 className="r" style={{ fontSize: 'clamp(36px, 5vw, 64px)', fontWeight: 700, letterSpacing: '-.028em', lineHeight: .98, marginBottom: 56, color: 'var(--txt)', transition: 'color .4s ease', transitionDelay: '.08s' }}>
+                        What to Expect
+                    </h2>
+
+                    <div className="r" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 32, transitionDelay: '.15s' }}>
+                        {[
+                            ['Application Review', 'We review every application within 72 hours.'],
+                            ['Screening Call', 'A 20 minute intro call to discuss background and fit.'],
+                            ['Technical Round', 'Relevant technical discussion or take home task.'],
+                            ['Culture Fit', 'A casual conversation with our founding team.'],
+                            ['Offer', 'Fast decision making and smooth onboarding.']
+                        ].map(([title, desc], i) => (
+                            <div key={i} style={{ position: 'relative' }}>
+                                <div style={{
+                                    width: 48, height: 48, borderRadius: '50%', border: '2px solid var(--a)',
+                                    color: 'var(--txt)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    fontSize: 18, fontWeight: 600, marginBottom: 20
+                                }}>
+                                    {i + 1}
+                                </div>
+                                <h3 style={{ fontSize: 16, fontWeight: 600, color: 'var(--txt)', marginBottom: 8 }}>{title}</h3>
+                                <p style={{ fontSize: 14, color: 'var(--sub)', lineHeight: 1.6 }}>{desc}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+
+
+            {/* APPLICATION FORM & SIDEBAR */}
+            <section ref={formZoneRef} className="sp" style={{
+                background: 'var(--bg)', paddingTop: 40, paddingBottom: 140,
+                paddingLeft: 80, paddingRight: 80, transition: 'background .4s ease',
+            }}>
+                <div className="contact-wrap" style={{ maxWidth: 1100, margin: '0 auto' }}>
+                    <div className="contact-form-grid">
+                        <div className={`contact-form-shell ${formPhase === 'out' ? 'is-out' : 'is-in'}`}>
+                            {sent ? (
+                                <div className="contact-form-card">
+                                    <div className="contact-ok">✓</div>
+                                    <h2 style={{ fontSize: 'clamp(34px, 5vw, 56px)', fontWeight: 700, letterSpacing: '-.03em', color: 'var(--txt)', marginBottom: 12 }}>
+                                        Application <span style={{ color: 'var(--a)' }}>Received.</span>
+                                    </h2>
+                                    <p style={{ fontSize: 15, color: 'var(--sub)', lineHeight: 1.72, marginBottom: 14 }}>
+                                        Thanks, {submitted.firstName}. We have received your application. We hand-review every submission.
+                                    </p>
+                                    <p style={{ fontSize: 13, color: 'var(--sub)', lineHeight: 1.7, marginBottom: 24 }}>
+                                        If your profile aligns with our current roadmap, our team will be in touch within 72 hours.
+                                    </p>
+                                    <a href="/" onClick={() => window.location.href = '/'} className="nl" data-h style={{ fontSize: 14 }}>Explore Genyx →</a>
+                                </div>
+                            ) : (
+                                <form onSubmit={submitForm} className="contact-form-card">
+                                    <div className="contact-form-title">Apply to Genyx</div>
+
+                                    {/* 6A: PRIMARY DETAILS */}
+                                    <div className="contact-sec-lbl">PRIMARY DETAILS</div>
+                                    <div className="div" />
+                                    <div className="contact-grid-2">
+                                        <div>
+                                            <label className={`contact-lbl${errors.firstName ? ' is-err' : ''}`}>First Name <span style={{ color: 'var(--a)' }}>*</span></label>
+                                            <input className={`fi${errors.firstName ? ' fi-err' : ''}`} placeholder="First Name" value={form.firstName} onChange={upd('firstName')} data-h />
+                                            {err('firstName')}
+                                        </div>
+                                        <div>
+                                            <label className={`contact-lbl${errors.lastName ? ' is-err' : ''}`}>Last Name <span style={{ color: 'var(--a)' }}>*</span></label>
+                                            <input className={`fi${errors.lastName ? ' fi-err' : ''}`} placeholder="Last Name" value={form.lastName} onChange={upd('lastName')} data-h />
+                                            {err('lastName')}
+                                        </div>
+                                    </div>
+                                    <div className="contact-grid-2">
+                                        <div>
+                                            <label className={`contact-lbl${errors.email ? ' is-err' : ''}`}>Email <span style={{ color: 'var(--a)' }}>*</span></label>
+                                            <input className={`fi${errors.email ? ' fi-err' : ''}`} placeholder="you@example.com" type="email" value={form.email} onChange={upd('email')} data-h />
+                                            {err('email')}
+                                        </div>
+                                        <div>
+                                            <label className="contact-lbl">Phone Number</label>
+                                            <input className="fi" placeholder="+91 XXXXX XXXXX" value={form.phone} onChange={upd('phone')} data-h />
+                                        </div>
+                                    </div>
+
+                                    <div className="contact-sec-lbl" style={{ marginTop: 40 }}>PROFESSIONAL DETAILS</div>
+                                    <div className="div" />
+                                    <div className="contact-grid-2">
+                                        <ContactSelect
+                                            label={<>Role Applying For <span style={{ color: 'var(--a)' }}>*</span></>}
+                                            value={form.roleApplyingFor}
+                                            onChange={(v) => {
+                                                setForm((f) => ({ ...f, roleApplyingFor: v }));
+                                                setErrors((prev) => ({ ...prev, roleApplyingFor: '' }));
+                                            }}
+                                            error={errors.roleApplyingFor}
+                                            options={[
+                                                'ML Engineer, Movement Analysis', 'Frontend Developer (React)',
+                                                'Sports Scientist / Biomechanics Researcher', 'Product Designer (UI/UX)',
+                                                'DevOps / Infrastructure Engineer', 'Marketing & Growth Lead',
+                                                'Content Writer, Sports Tech', 'Founding Intern, Engineering',
+                                                'Open Application / Other'
+                                            ]}
+                                        />
+                                        <ContactSelect
+                                            label="Department"
+                                            value={form.department}
+                                            onChange={(v) => setForm((f) => ({ ...f, department: v }))}
+                                            options={['Engineering', 'Design', 'Sports Science', 'Product', 'Marketing', 'Operations', 'Other']}
+                                        />
+                                    </div>
+                                    <div className="contact-grid-2">
+                                        <ContactSelect
+                                            label={<>Experience Level <span style={{ color: 'var(--a)' }}>*</span></>}
+                                            value={form.experience}
+                                            onChange={(v) => {
+                                                setForm((f) => ({ ...f, experience: v }));
+                                                setErrors((prev) => ({ ...prev, experience: '' }));
+                                            }}
+                                            error={errors.experience}
+                                            options={['Fresher (0-1 years)', 'Junior (1-3 years)', 'Mid-Level (3-5 years)', 'Senior (5-8 years)', 'Lead/Staff (8+ years)']}
+                                        />
+                                        <div>
+                                            <label className="contact-lbl">Current Role / Title</label>
+                                            <input className="fi" placeholder="e.g. Frontend Developer" value={form.currentRole} onChange={upd('currentRole')} data-h />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="contact-lbl">Current Company / University</label>
+                                        <input className="fi" placeholder="e.g. Acme Corp / IIT Bombay" value={form.currentCompany} onChange={upd('currentCompany')} data-h />
+                                    </div>
+
+                                    <div className="contact-sec-lbl" style={{ marginTop: 40 }}>LINKS & PORTFOLIO</div>
+                                    <div className="div" />
+                                    <div>
+                                        <label className="contact-lbl">LinkedIn Profile URL</label>
+                                        <input className="fi" placeholder="https://linkedin.com/in/yourprofile" value={form.linkedin} onChange={upd('linkedin')} data-h />
+                                    </div>
+                                    <div>
+                                        <label className="contact-lbl">Portfolio / GitHub / Website</label>
+                                        <input className="fi" placeholder="https://github.com/yourhandle or portfolio URL" value={form.portfolio} onChange={upd('portfolio')} data-h />
+                                    </div>
+                                    <div>
+                                        <label className={`contact-lbl${errors.resumeLink ? ' is-err' : ''}`}>Resume / CV Link <span style={{ color: 'var(--a)' }}>*</span></label>
+                                        <input className={`fi${errors.resumeLink ? ' fi-err' : ''}`} placeholder="Google Drive, DropBox, or direct PDF link" value={form.resumeLink} onChange={upd('resumeLink')} data-h />
+                                        {err('resumeLink')}
+                                        <p style={{ fontSize: 11, color: 'var(--dim)', marginTop: 6 }}>*We currently accept direct links to your resume. Make sure sharing permissions allow 'Anyone with the link' to view.</p>
+                                    </div>
+
+                                    <div className="contact-sec-lbl" style={{ marginTop: 40 }}>WHAT EXCITES YOU ABOUT GENYX?</div>
+                                    <div className="div" />
+                                    <div>
+                                        <div className="contact-checkgrp">
+                                            {['Working at the intersection of AI and sports', 'Building real time computer vision systems', 'Shaping a product from the early stage', 'Working directly with coaches and athletes', 'Remote first, flexible work culture', 'The startup energy and speed of execution', 'Other'].map((opt) => (
+                                                <button key={opt} type="button" className="contact-opt" onClick={() => toggleMulti('whyGenyx', opt)} data-h style={{ textAlign: 'left', minHeight: 44, alignItems: 'center' }}>
+                                                    <span className={`contact-box${form.whyGenyx && form.whyGenyx.includes(opt) ? ' is-on' : ''}`} style={{ flexShrink: 0 }}>✓</span><span style={{ lineHeight: 1.4 }}>{opt}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="contact-sec-lbl" style={{ marginTop: 40 }}>YOUR BIGGEST STRENGTH</div>
+                                    <div className="div" />
+                                    <div>
+                                        <div className="contact-radiogrp">
+                                            {['Deep technical expertise in my domain', 'Strong communication & collaboration skills', 'Self driven. I thrive with ownership and autonomy', 'Creative problem solving & product thinking', 'Cross functional. I bridge tech and business'].map((opt) => (
+                                                <button key={opt} type="button" className="contact-opt" onClick={() => setRadio('biggestStrength', opt)} data-h style={{ textAlign: 'left', minHeight: 44, alignItems: 'center' }}>
+                                                    <span className={`contact-dot${form.biggestStrength === opt ? ' is-on' : ''}`} style={{ flexShrink: 0 }} /><span>{opt}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="contact-sec-lbl" style={{ marginTop: 40 }}>PREFERRED WORK ARRANGEMENT</div>
+                                    <div className="div" />
+                                    <div>
+                                        <div className="contact-radiogrp">
+                                            {['Fully Remote', 'Hybrid (City based)', 'On site (Pune)', 'Open to anything'].map((opt) => (
+                                                <button key={opt} type="button" className="contact-opt" onClick={() => setRadio('preferredWork', opt)} data-h style={{ textAlign: 'left' }}>
+                                                    <span className={`contact-dot${form.preferredWork === opt ? ' is-on' : ''}`} style={{ flexShrink: 0 }} /><span>{opt}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="contact-grid-2" style={{ marginTop: 40 }}>
+                                        <ContactSelect
+                                            label={<>AVAILABILITY <span style={{ color: 'var(--a)' }}>*</span></>}
+                                            value={form.availability}
+                                            onChange={(v) => {
+                                                setForm((f) => ({ ...f, availability: v }));
+                                                setErrors((prev) => ({ ...prev, availability: '' }));
+                                            }}
+                                            error={errors.availability}
+                                            options={['Immediately', 'Within 2 weeks', 'Within 1 month', 'Within 3 months', 'Just exploring for now']}
+                                        />
+                                        <ContactSelect
+                                            label="HOW DID YOU HEAR ABOUT US?"
+                                            value={form.hearAboutUs}
+                                            onChange={(v) => setForm((f) => ({ ...f, hearAboutUs: v }))}
+                                            options={['LinkedIn', 'Twitter / X', 'Instagram', 'Referral from someone at Genyx', 'Job board', 'College / University placement', 'Google Search', 'Other']}
+                                        />
+                                    </div>
+
+                                    <div className="contact-sec-lbl" style={{ marginTop: 40 }}>WHY SHOULD WE WORK TOGETHER?</div>
+                                    <div className="div" />
+                                    <div>
+                                        <textarea className="fi" rows={6} style={{ minHeight: 140 }} placeholder="Tell us about yourself, why you're excited about Genyx, what you'd bring to the team, or anything else you'd like us to know. Links to projects, demos, or published work are welcome!" value={form.whyShouldWeWorkTogether} onChange={upd('whyShouldWeWorkTogether')} data-h />
+                                    </div>
+
+                                    {Object.keys(errors).length > 0 && !errors.submit && (
+                                        <div className="contact-err" style={{ marginTop: 20, textAlign: 'center' }}>Please fix the errors above before submitting.</div>
+                                    )}
+                                    {err('submit') && <div style={{ marginTop: 20, textAlign: 'center' }}>{err('submit')}</div>}
+                                    <button type="submit" className="cp contact-submit" disabled={submitting} data-h style={{ marginTop: 20 }}>
+                                        <span>{submitting ? 'Submitting...' : 'Submit Application →'}</span>
+                                    </button>
+                                </form>
+                            )}
+
+                            {/* SECTION 7: OPEN APPLICATION CTA */}
+                            <div style={{ marginTop: 40, padding: '32px 36px', background: 'var(--bg2)', borderRadius: 16, border: '1px solid var(--bd)' }}>
+                                <h3 style={{ fontSize: 18, color: 'var(--txt)', fontWeight: 600, marginBottom: 8 }}>Don't See Your Role?</h3>
+                                <p style={{ fontSize: 14, color: 'var(--sub)', lineHeight: 1.6 }}>We're always looking for exceptional people. If you believe you can contribute to Genyx in a way we haven't listed, we'd love to hear from you. Use the form above and select "Open Application / Other" as your role.</p>
+                            </div>
+                        </div>
+
+                        {/* SECTION 2: RIGHT SIDEBAR INFO CARD */}
+                        <aside className="contact-info">
+                            <div className="contact-info-hi">
+                                <h3>Careers at Genyx</h3>
+                                <p style={{ marginBottom: 16 }}>We're building the future of movement intelligence. Join our growing team across engineering, design, sports science, and operations.</p>
+                                <div className="contact-info-list" style={{ fontSize: 14, color: 'var(--sub)' }}>
+                                    <div>• Work on cutting edge AI & computer vision</div>
+                                    <div>• Direct impact in a fast growing startup</div>
+                                    <div>• Remote first, flexible work culture</div>
+                                    <div>• Collaborate with coaches & athletes</div>
+                                </div>
+                            </div>
+                            <div className="contact-info-card">
+                                <div className="contact-meta">
+                                    <div>
+                                        <div className="contact-info-k">TEAM SIZE</div>
+                                        <div className="contact-info-v">Growing</div>
+                                    </div>
+                                    <div>
+                                        <div className="contact-info-k">LOCATION</div>
+                                        <div style={{ color: 'var(--txt)', fontSize: 14, fontWeight: 500 }}>India</div>
+                                        <div style={{ color: 'var(--sub)', fontSize: 12, marginTop: 4 }}>IST timezone · Remote first</div>
+                                    </div>
+                                </div>
+                                <div className="div" style={{ margin: '14px 0' }} />
+                                <div className="contact-meta">
+                                    <div>
+                                        <div className="contact-info-k">RESPONSE</div>
+                                        <div className="contact-info-v">72h</div>
+                                    </div>
+                                </div>
+                                <div className="div" style={{ margin: '14px 0' }} />
+                                <div className="contact-info-k">Quick Links</div>
+                                <div className="contact-linklist">
+                                    <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="nl" data-h style={{ background: 'none', border: 'none', padding: 0, textAlign: 'left', cursor: 'pointer', fontSize: 14 }}>→ Open Positions</button>
+                                    <a href="/about" onClick={() => window.location.href = '/about'} className="nl" data-h style={{ fontSize: 14 }}>→ Our Culture</a>
+                                    <a href="/platform" onClick={() => window.location.href = '/platform'} className="nl" data-h style={{ fontSize: 14 }}>→ Why Genyx</a>
+                                    <button onClick={() => formZoneRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })} className="nl" data-h style={{ background: 'none', border: 'none', padding: 0, textAlign: 'left', cursor: 'pointer', fontSize: 14 }}>→ Apply Now</button>
+                                </div>
+                            </div>
+                        </aside>
+                    </div>
+                </div>
+            </section>
+
             <Footer />
         </>
     );

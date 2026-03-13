@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { CSS } from './styles/siteCss';
 import { Cursor, Nav } from './components/LayoutChrome';
-import { HomePage, PlatformPage, AnalyticsPage, AboutPage, ContactPage } from './pages/SitePages';
+import { HomePage, PlatformPage, AnalyticsPage, AboutPage, ContactPage, CareersPage } from './pages/SitePages';
 
 const pageToPath = {
   home: '/',
@@ -9,6 +9,7 @@ const pageToPath = {
   analytics: '/analytics',
   about: '/about',
   contact: '/contact',
+  careers: '/careers',
 };
 
 const pathToPage = {
@@ -17,6 +18,7 @@ const pathToPage = {
   '/analytics': 'analytics',
   '/about': 'about',
   '/contact': 'contact',
+  '/careers': 'careers',
 };
 
 function resolvePage(pathname) {
@@ -66,6 +68,7 @@ export default function App() {
         {page === 'analytics' && <AnalyticsPage />}
         {page === 'about' && <AboutPage />}
         {page === 'contact' && <ContactPage />}
+        {page === 'careers' && <CareersPage />}
       </main>
     </>
   );

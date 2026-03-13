@@ -17,7 +17,7 @@ app.use(express.json());
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: Number(process.env.SMTP_PORT),
-  secure: false,
+  secure: true,
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
@@ -34,6 +34,10 @@ function buildEmailHtml(role, form) {
     investor: 'Investor Inquiry',
     product: 'Product Inquiry',
     other: 'General Inquiry',
+    engineering: 'Career Application — Engineering',
+    ai: 'Career Application — AI & Research',
+    product_design: 'Career Application — Product & Design',
+    gtm: 'Career Application — Go-To-Market',
   };
 
   const title = roleTitles[role] || 'Contact Form Submission';
@@ -68,6 +72,21 @@ function buildEmailHtml(role, form) {
     otherOrg: 'Organisation',
     otherTopic: 'Topic',
     otherMessage: 'Message',
+    experience: 'Experience Level',
+    currentRole: 'Current Role',
+    currentCompany: 'Current Company',
+    resumeLink: 'Resume Link',
+    linkedin: 'LinkedIn',
+    portfolio: 'Portfolio/Website',
+    whyGenyx: 'Why Genyx',
+    biggestStrength: 'Biggest Strength',
+    preferredWork: 'Preferred Work Arrangement',
+    availability: 'Availability',
+    hearAboutUs: 'How did you hear about us',
+    whyShouldWeWorkTogether: 'Why work together',
+    roleApplyingFor: 'Role Applying For',
+    department: 'Department',
+    phone: 'Phone Number',
   };
 
   const relevantFields = {
@@ -165,6 +184,64 @@ app.post('/api/contact', async (req, res) => {
   } catch (err) {
     console.error('Submission processing error:', err.message);
     res.status(500).json({ error: 'Failed to process submission. Please try again later.' });
+  }
+});
+
+app.post('/api/careers', async (req, res) => {
+  const { role, form } = req.body;
+
+  if (!role || !form || !form.email || !form.firstName) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  const roleTitles = {
+    engineering: 'Career Application — Engineering',
+    ai: 'Career Application — AI & Research',
+    product_design: 'Career Application — Product & Design',
+    gtm: 'Career Application — Go-To-Market',
+  };
+
+  try {
+    let submissionId = null;
+    try {
+      const submission = await prisma.contactSubmission.create({
+        data: {
+          role: `career_${role}`,
+          firstName: form.firstName,
+          lastName: form.lastName || null,
+          email: form.email,
+          formData: form,
+        }
+      });
+      submissionId = submission.id;
+    } catch (dbErr) {
+      console.warn('DB Save Skipped (MySQL not configured yet):', dbErr.message);
+    }
+
+    try {
+      await transporter.sendMail({
+        from: `"Genyx Careers" <${process.env.SMTP_USER}>`,
+        to: process.env.RECIPIENT_EMAIL,
+        replyTo: form.email,
+        subject: `New Application: ${roleTitles[role] || 'Career'} — ${form.firstName} ${form.lastName || ''}`.trim(),
+        html: buildEmailHtml(role, form),
+      });
+    } catch (emailErr) {
+      console.error('❌ STMP Send Error (Careers):', emailErr);
+      throw emailErr;
+    }
+
+    if (submissionId) {
+      await prisma.contactSubmission.update({
+        where: { id: submissionId },
+        data: { emailSent: true }
+      }).catch(e => console.warn('Failed to update email status in DB'));
+    }
+
+    res.json({ success: true, message: 'Application processed successfully' });
+  } catch (err) {
+    console.error('Application processing error:', err.message);
+    res.status(500).json({ error: 'Failed to process application. Please try again later.' });
   }
 });
 
